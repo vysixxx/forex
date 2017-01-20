@@ -1,0 +1,28 @@
+from dtw import dtw
+x = array([0, 0, 1, 1, 2, 4, 2, 1, 2, 0]).reshape(-1, 1)
+y = array([1, 1, 1, 2, 2, 2, 2, 3, 2, 0]).reshape(-1, 1)
+plot(x)
+plot(y)
+dist, cost, acc, path = dtw(x, y, dist=lambda x, y: norm(x - y, ord=1))
+print ('Minimum distance found:'), dist
+imshow(acc.T, origin='lower', cmap=cm.gray, interpolation='nearest')
+plot(path[0], path[1], 'w')
+xlim((-0.5, acc.shape[0]-0.5))
+ylim((-0.5, acc.shape[1]-0.5))
+def my_custom_norm(x, y):
+    return (x * x) + (y * y)
+
+dist, cost, acc, path = dtw(x, y, dist=my_custom_norm)
+from numpy.linalg import norm
+
+dist, cost, acc, path = dtw(x, y, dist=norm)
+x = range(10)
+y = [0] * 5 + x
+
+x = array(x).reshape(-1, 1)
+y = array(y).reshape(-1, 1)
+dist, cost, acc, path = dtw(x, y, dist=lambda x, y: norm(x - y, ord=1))
+imshow(acc.T, origin='lower', cmap=cm.gray, interpolation='nearest')
+plot(path[0], path[1], 'w')
+xlim((-0.5, acc.shape[0]-0.5))
+ylim((-0.5, acc.shape[1]-0.5))
