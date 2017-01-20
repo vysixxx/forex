@@ -1,0 +1,4 @@
+from pandas import read_csv
+series = read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/EURUSD15.csv', header=0, parse_dates=[0], index_col=0, squeeze=True)
+print(type(series))
+print(series.head(30))
