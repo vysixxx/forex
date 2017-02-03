@@ -10,11 +10,34 @@ seriesClose=series['CLOSE']
 seriesOpen=series['OPEN']
 Close=np.array(200)
 Open=np.array(200)
+RW=np.array(200)
 Close=np.copy(seriesClose)
 Open=np.copy(seriesOpen)
+
 RW=Close-Open
+RW.resize(20,10)
 
-for index in range(len(RW)):
+PrumRW={}
+Walk={}
+
+for i in range (20):    
+    PrumRW[i]=np.mean(RW[i])
+    for j in range (10):
+        Walk[j]=RW[j]+RW[j-1]
+        
+   
+    
+
+
+"""for index in range(len(RW)):
     RW[index]=RW[index]+RW[index-1]
+    
 
+plt.title('Random Walk')
 plt.plot(RW)
+plt.grid(True)
+Mean=np.mean(RW)
+Mean2=2*Mean
+plt.axhline(Mean, xmin=0, xmax=1, c='r')
+plt.axhline(Mean2, xmin=0, xmax=1, c='r')
+plt.show()"""
