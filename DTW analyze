@@ -1,0 +1,34 @@
+from PIL import Image
+from numpy import array
+from collections import OrderedDict
+from scipy.spatial.distance import hamming
+from fastdtw import fastdtw
+
+
+
+
+
+data = {}
+   
+for fn in range(1,8):
+    img = Image.open("C:/TradePictures/{0}.jpg".format(fn))
+    arr = array(img)
+    list = []
+    for n in arr: list.append(n[0][0])
+    for n in arr: list.append(n[0][1])
+    for n in arr: list.append(n[0][2])
+    data[fn] = list
+   
+reference = data[5]
+
+result ={}
+
+
+for x, y in data.items():
+    dist, path = fastdtw(reference, y, dist=hamming)
+    result[x] = dist
+
+
+sortedRes = OrderedDict(sorted(result.items(), key=lambda x: x[1]))
+for a,b in sortedRes.items():
+    print("{0}-{1}".format(a,b))
