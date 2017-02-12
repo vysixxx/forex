@@ -169,9 +169,9 @@ void NewBarH1() //detekováni nové svíce v D1
   {
    static datetime New_Time=0;
    TestH1=false;
-   if(New_Time!=iTime(NULL,0,0))
+   if(New_Time!=Time[0])
      {
-      New_Time=iTime(NULL,0,0);
+      New_Time=Time[0];
       TestH1=true;
      }
   }
