@@ -1,0 +1,177 @@
+//+------------------------------------------------------------------+
+//|                                                    GapExpert.mq4 |
+//|                                                          VysiXXX |
+//|                                                                  |
+//+------------------------------------------------------------------+
+#property copyright "VysiXXX"
+#property link      ""
+
+
+extern int BE = 0;             // Posun na BE v bodech
+extern int BEPlus = 10;
+extern double Lots = 0.01;
+extern int RRRTP = 2;            /// RRR nasobek SL
+extern int CandleTimer = 3;       ///Počet svící po kterých příkaz zruší
+
+//--------------------------------------------------------------
+
+
+
+double TPpips,LongDelete,ShortDelete,TPLong,TPShort,SLLong,SLShort,NumberCandle;
+bool TestH1,GAPDown,GAPUp;
+int i,j,k,ticket,Error;
+double Pips=0.2,Gap,RRRS,RRRL;
+
+//+------------------------------------------------------------------+
+//| expert initialization function                                   |
+//+------------------------------------------------------------------+
+int init()
+  {
+//----
+   
+//----
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+int deinit()
+  {
+      
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| expert start function                                            |
+//+------------------------------------------------------------------+
+int start()
+  { 
+  
+
+ 
+ //---------------------------------------------- code gap
+   
+  NewBarH1();
+  if(TestH1 == true)
+  {
+  
+  
+  
+  if(Close[1]>Open[1])
+        {
+         Gap=Close[1]-High[2];
+         
+         if(Low[3]<Low[2]) SLLong=High[2]-Low[3];
+         else SLLong=High[2]-Low[2];         
+         TPLong=Close[1]-High[2];
+         RRRL = TPLong/SLLong;
+         if(RRRL > RRRTP)  ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0004,0,0,0,"expert comment",255,0,CLR_NONE);
+         //Print("Long: ",TPLong,SLLong);
+        }
+
+      if(Close[1]<Open[1])
+        {
+         Gap=Low[1]-Close[1];
+         
+         if(High[3]>High[2]) SLShort=High[3]-Low[2];
+         else SLShort=High[2]-Low[1];
+         TPShort=Low[2]-Close[1];
+         RRRS = TPShort/SLShort;
+         if(RRRS > RRRTP)  ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0007,0,0,0,"expert comment",255,0,CLR_NONE);
+         
+         //Print("Short: ",TPShort,SLShort);
+        }
+  
+//----------------------------------------------  
+  
+  
+  
+  //---Řízení otevřených obj.----------+
+   for(i=0;i<OrdersTotal();i++)
+     {
+      OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      if(OrderSymbol()==Symbol())      
+        {
+        if(OrderType() == OP_BUY || OrderType() == OP_BUYSTOP || OrderType() == OP_BUYLIMIT) j++;
+        if(OrderType() == OP_SELL || OrderType() == OP_SELLSTOP || OrderType() == OP_SELLLIMIT) k++;
+        //if(OrderType() == OP_BUYSTOP && Close[0] <= LongDelete) OrderDelete(OrderTicket());
+        //if(OrderType() == OP_SELLSTOP && Close[0] >= ShortDelete) OrderDelete(OrderTicket());
+        }
+        }
+        
+        
+        if(OrderType() == OP_BUY)
+            {
+            if(BE > 0)
+               {
+               if(OrderStopLoss() < OrderOpenPrice())
+               {               
+               if(Close[0] >= OrderOpenPrice() + (TPpips))
+                  {                  
+                  OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(OrderOpenPrice()+(BEPlus*Point),Digits),OrderTakeProfit(),0);                                    
+                  }
+               }
+               }
+             }
+        if(OrderType() == OP_SELL)
+            {
+            if(BE > 0)
+               {
+               if(OrderStopLoss() > OrderOpenPrice())
+               {
+               if(Close[0] <= OrderOpenPrice() - (TPpips))
+                  {                 
+                  OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(OrderOpenPrice()-(BEPlus*Point),Digits),OrderTakeProfit(),0);                                                      
+                  }
+             
+               }
+               }
+            }
+        
+  
+  
+  //---Řízení otevřených obj.----------+
+   for(i=0;i<OrdersTotal();i++)
+     {
+      OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      if(OrderSymbol()==Symbol())      
+        {
+        if(OrderType() ==  OP_BUYLIMIT) 
+         {
+         NumberCandle=(TimeCurrent()-OrderOpenTime())/Period();
+         if(NumberCandle>=CandleTimer)OrderDelete(OrderTicket());
+         }
+        if(OrderType() == OP_SELL || OrderType() == OP_SELLSTOP || OrderType() == OP_SELLLIMIT) k++;
+        
+        
+        
+        }
+     }
+  
+  
+  
+  
+  
+  
+ 
+  
+ 
+ }
+ 
+    
+    
+   
+   
+   return(0);
+  }
+//+------------------------------------------------------------------+
+
+void NewBarH1() //detekováni nové svíce v D1
+  {
+   static datetime New_Time=0;
+   TestH1=false;
+   if(New_Time!=iTime(NULL,0,0))
+     {
+      New_Time=iTime(NULL,0,0);
+      TestH1=true;
+     }
+  }
