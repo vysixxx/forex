@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Feb  5 05:58:51 2017
+
+@author: uživatel
+"""
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import nolds
+import seaborn as sns
+
+series = pd.read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/EURUSD.txt', header=1, parse_dates=None, index_col=0, squeeze=True)
+
+#print(type(series))
+#print(series.head(10))
+seriesClose=series['CLOSE']
+Close=np.array(200)
+RZm=np.array(200)
+Close=np.copy(seriesClose)
+RZm=np.copy(Close)
+for i in range(199):    
+   RZm[i]=(RZm[i+1]-RZm[i])/RZm[i]
+ 
+RZm=np.delete(RZm,199)     
+MeanRZm=np.mean(RZm)
+RZmSort=np.absolute(RZm)
+RZmSort=np.sort(RZmSort)
+
+fig = plt.figure()
+axes1 = plt.subplot2grid((3,2), (0,0), colspan=3)
+axes2 = plt.subplot2grid((3,2), (1,0), colspan=3)
+axes3 = plt.subplot2grid((3,2), (2,0), colspan=1)
+axes1.set_title('Relativní prirustek')
+axes2.set_title('CLOSE cena')
+axes3.set_title('Rel. prir. Abs min max')
+
+#plt.axhline(MeanRZm, xmin=0, xmax=1, c='r')
+axes1.plot(RZm)
+axes2.plot(Close)
+axes3.plot(RZmSort)
+fig.tight_layout()
+
+
+fig = plt.figure()
+plt.hist(RZm, bins=30, normed=1)
+
+H=nolds.hurst_rs(Close)
+print("Hurst: ",H,", MeanRZm: ",MeanRZm)
