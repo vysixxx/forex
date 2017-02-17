@@ -1,7 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Feb 10 09:41:57 2017
+
+@author: uživatel
+"""
+
 from PIL import Image
 from numpy import array
 from collections import OrderedDict
-from scipy.spatial.distance import hamming
+from scipy.spatial.distance import sqeuclidean
 from fastdtw import fastdtw
 
 
@@ -10,7 +17,7 @@ from fastdtw import fastdtw
 
 data = {}
    
-for fn in range(1,8):
+for fn in range(1,10):
     img = Image.open("C:/TradePictures/{0}.jpg".format(fn))
     arr = array(img)
     list = []
@@ -19,13 +26,13 @@ for fn in range(1,8):
     for n in arr: list.append(n[0][2])
     data[fn] = list
    
-reference = data[5]
+reference = data[1]
 
 result ={}
 
 
 for x, y in data.items():
-    dist, path = fastdtw(reference, y, dist=hamming)
+    dist, path = fastdtw(reference, y, dist=sqeuclidean)
     result[x] = dist
 
 
