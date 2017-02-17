@@ -1,0 +1,29 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Feb 14 16:20:30 2017
+
+@author: uživatel
+"""
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import seaborn as sns
+
+series = pd.read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/EURUSD.txt', header=1, parse_dates=None, index_col=0, squeeze=True)
+seriesClose=series['CLOSE']
+Close=np.array(200)
+Close=np.copy(seriesClose)
+Close.resize((20,10))
+
+for i in range (19):
+    plt.plot(Close[i,:]) 
+
+result={}   
+reference=Close[0,:]
+for j in range (20):        
+    Corr=np.corrcoef(reference,Close[j,:])
+    #print(Corr)
+    result[j]=Corr
+
+print(result) 
