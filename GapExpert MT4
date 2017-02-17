@@ -17,7 +17,7 @@ extern int CandleTimer = 3;       ///Počet svící po kterých příkaz zruší
 
 
 
-double TPpips,LongDelete,ShortDelete,TPLong,TPShort,SLLong,SLShort,NumberCandle;
+double TPpips,LongDelete,ShortDelete,TPLong,TPShort,SLLong,SLShort,NumberCandle,LongSLPrice,ShortSLPrice;
 bool TestH1,GAPDown,GAPUp;
 int i,j,k,ticket,Error;
 double Pips=0.2,Gap,RRRS,RRRL;
@@ -60,11 +60,19 @@ int start()
         {
          Gap=Close[1]-High[2];
          
-         if(Low[3]<Low[2]) SLLong=High[2]-Low[3];
-         else SLLong=High[2]-Low[2];         
-         TPLong=Close[1]-High[2];
+         if(Low[1]<Low[2])
+            {
+            SLLong=High[2]-Low[1];
+            LongSLPrice=Low[1]-0.0002;
+            }
+            else 
+               {
+               SLLong=High[2]-Low[2];
+               LongSLPrice=Low[2]-0.0002;
+               }         
+         TPLong=Close[1]-High[2];         
          RRRL = TPLong/SLLong;
-         if(RRRL > RRRTP)  ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0004,0,0,0,"expert comment",255,0,CLR_NONE);
+         if(RRRL > RRRTP)  ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,Close[1]-0.0003,"expert comment",255,0,CLR_NONE);
          //Print("Long: ",TPLong,SLLong);
         }
 
@@ -72,11 +80,19 @@ int start()
         {
          Gap=Low[1]-Close[1];
          
-         if(High[3]>High[2]) SLShort=High[3]-Low[2];
-         else SLShort=High[2]-Low[1];
+         if(High[1]>High[2]) 
+            {
+            SLShort=High[1]-Low[2];
+            ShortSLPrice=High[1]+0.0006;
+            }
+            else 
+               {
+               SLShort=High[2]-Low[2];
+               ShortSLPrice=High[2]+0.0006;
+               }
          TPShort=Low[2]-Close[1];
          RRRS = TPShort/SLShort;
-         if(RRRS > RRRTP)  ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0007,0,0,0,"expert comment",255,0,CLR_NONE);
+         if(RRRS > RRRTP)  ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]+0.0006,"expert comment",255,0,CLR_NONE);
          
          //Print("Short: ",TPShort,SLShort);
         }
@@ -137,10 +153,16 @@ int start()
         {
         if(OrderType() ==  OP_BUYLIMIT) 
          {
-         NumberCandle=(TimeCurrent()-OrderOpenTime())/Period();
+         NumberCandle=(TimeCurrent()-OrderOpenTime())/(Period()*60);
+         Print(NumberCandle);
          if(NumberCandle>=CandleTimer)OrderDelete(OrderTicket());
          }
-        if(OrderType() == OP_SELL || OrderType() == OP_SELLSTOP || OrderType() == OP_SELLLIMIT) k++;
+        if(OrderType()  == OP_SELLLIMIT) 
+         {
+         NumberCandle=(TimeCurrent()-OrderOpenTime())/(Period()*60);
+         //Print(NumberCandle);
+         if(NumberCandle>=CandleTimer)OrderDelete(OrderTicket());
+         }
         
         
         
