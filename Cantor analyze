@@ -12,38 +12,53 @@ import seaborn as sns
 
 series = pd.read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/EURUSD.txt', header=1, parse_dates=None, index_col=0, squeeze=True)
 
-#print(type(series))
-#print(series.head(10))
+
 seriesClose=series['CLOSE']
 Close=np.array(200)
 RZm=np.array(200)
-Close=np.copy(seriesClose)
-RZm=np.copy(Close)
-for i in range(199):    
-   RZm[i]=(RZm[i+1]-RZm[i])/RZm[i]
- 
-RZm=np.delete(RZm,199)     
-MeanRZm=np.mean(RZm)
-RZmSort=np.absolute(RZm)
-RZmSort=np.sort(RZmSort)
+Close=(np.copy(seriesClose))*10000
+RZm=np.ediff1d(Close)
+RZmABS=np.absolute(np.ediff1d(Close))
 
 fig = plt.figure()
 axes1 = plt.subplot2grid((3,2), (0,0), colspan=3)
 axes2 = plt.subplot2grid((3,2), (1,0), colspan=3)
 axes3 = plt.subplot2grid((3,2), (2,0), colspan=1)
-axes1.set_title('Relativní prirustek')
+axes1.set_title('Prirustek ABS hodn')
 axes2.set_title('CLOSE cena')
 axes3.set_title('Rel. prir. Abs min max')
 
+
+Median=np.median(Close)     
+MeanRZm=np.mean(RZmABS)
+Mean=np.divide(RZmABS,MeanRZm)
+    
+
+RZmSort=np.absolute(RZmABS)
+RZmSort=np.sort(RZmSort)
+
+ZeroPointMed=[]
+for i in range(198):
+    if (Close[i]>Median)and(Close[i+1]<Median):
+        list.append(ZeroPointMed,i)
+        axes2.axvline(i, linewidth=1, linestyle=':', c='g')        
+    if (Close[i]<Median)and(Close[i+1]>Median):
+        list.append(ZeroPointMed,i)
+        axes2.axvline(i, linewidth=1, linestyle=':', c='g')      
+
+
+
 #plt.axhline(MeanRZm, xmin=0, xmax=1, c='r')
-axes1.plot(RZm)
+axes1.plot(RZmABS)
 axes2.plot(Close)
+axes2.axhline(Median, xmin=0, xmax=1, linewidth=1, c='y')
+
 axes3.plot(RZmSort)
 fig.tight_layout()
 
-
 fig = plt.figure()
-plt.hist(RZm, bins=30, normed=1)
-
+sns.distplot(RZm, bins=40, kde=False, rug=True)
 H=nolds.hurst_rs(Close)
 print("Hurst: ",H,", MeanRZm: ",MeanRZm)
+
+plt.plot(Mean)
