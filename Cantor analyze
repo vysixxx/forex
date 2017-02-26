@@ -26,7 +26,7 @@ axes2 = plt.subplot2grid((3,2), (1,0), colspan=3)
 axes3 = plt.subplot2grid((3,2), (2,0), colspan=1)
 axes1.set_title('Prirustek ABS hodn')
 axes2.set_title('CLOSE cena')
-axes3.set_title('Rel. prir. Abs min max')
+axes3.set_title('Nulove body MED Diff')
 
 
 Median=np.median(Close)     
@@ -45,20 +45,23 @@ for i in range(198):
     if (Close[i]<Median)and(Close[i+1]>Median):
         list.append(ZeroPointMed,i)
         axes2.axvline(i, linewidth=1, linestyle=':', c='g')      
+ZeroPointMedDiff=np.diff(ZeroPointMed)
+ZeroPointMedDiv=[]
+for i in range(len(ZeroPointMedDiff)):    
+    if i>0:
+        Div=ZeroPointMedDiff[i]/ZeroPointMedDiff[i-1]
+        list.append(ZeroPointMedDiv,Div)
+        
+    
 
-
-
-#plt.axhline(MeanRZm, xmin=0, xmax=1, c='r')
 axes1.plot(RZmABS)
 axes2.plot(Close)
 axes2.axhline(Median, xmin=0, xmax=1, linewidth=1, c='y')
 
-axes3.plot(RZmSort)
+axes3.plot(ZeroPointMedDiff)
 fig.tight_layout()
 
 fig = plt.figure()
 sns.distplot(RZm, bins=40, kde=False, rug=True)
 H=nolds.hurst_rs(Close)
 print("Hurst: ",H,", MeanRZm: ",MeanRZm)
-
-plt.plot(Mean)
