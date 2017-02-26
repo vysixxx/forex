@@ -10,13 +10,13 @@ import numpy as np
 import nolds
 import seaborn as sns
 
-series = pd.read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/EURUSD.txt', header=1, parse_dates=None, index_col=0, squeeze=True)
+series = pd.read_csv('C:/Program Files/MetaTrader 4 Admiral Markets AS DAX/MQL4/Files/EURJPY.txt', header=1, parse_dates=None, index_col=0, squeeze=True)
 
 
 seriesClose=series['CLOSE']
 Close=np.array(200)
 RZm=np.array(200)
-Close=(np.copy(seriesClose))*10000
+Close=(np.copy(seriesClose))*100
 RZm=np.ediff1d(Close)
 RZmABS=np.absolute(np.ediff1d(Close))
 
@@ -65,3 +65,10 @@ fig = plt.figure()
 sns.distplot(RZm, bins=40, kde=False, rug=True)
 H=nolds.hurst_rs(Close)
 print("Hurst: ",H,", MeanRZm: ",MeanRZm)
+
+CloseDel=np.copy(Close)
+MeanCeil=np.around(np.copy(Mean))
+for l in range(12):
+    for k in range(len(CloseDel)):
+        if MeanCeil[k]==l:
+            CloseDel[k]=0
