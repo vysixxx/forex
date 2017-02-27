@@ -63,12 +63,16 @@ fig.tight_layout()
 
 fig = plt.figure()
 sns.distplot(RZm, bins=40, kde=False, rug=True)
+fig = plt.figure()
+
 H=nolds.hurst_rs(Close)
 print("Hurst: ",H,", MeanRZm: ",MeanRZm)
 
-CloseDel=np.copy(Close)
+Interval=np.ones((199,15))
 MeanCeil=np.around(np.copy(Mean))
-for l in range(12):
-    for k in range(len(CloseDel)):
-        if MeanCeil[k]==l:
-            CloseDel[k]=0
+for j in range(14):
+    for k in range(199):
+        if MeanCeil[k]==j:
+            Interval[k][j]=0
+        if MeanCeil[k]!=j:
+            plt.plot(k,j)
