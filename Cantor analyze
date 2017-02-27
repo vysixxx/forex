@@ -70,9 +70,9 @@ print("Hurst: ",H,", MeanRZm: ",MeanRZm)
 
 Interval=np.ones((199,15))
 MeanCeil=np.around(np.copy(Mean))
-for j in range(14):
+for j in range(15):
     for k in range(199):
-        if MeanCeil[k]==j:
+        if (MeanCeil[k]==j)or(Interval[k][j-1]==0):
             Interval[k][j]=0
         if MeanCeil[k]!=j:
-            plt.plot(k,j)
+            plt.plot(j,k,'r--')
