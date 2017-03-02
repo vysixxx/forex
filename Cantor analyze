@@ -68,6 +68,7 @@ fig = plt.figure()
 H=nolds.hurst_rs(Close)
 print("Hurst: ",H,", MeanRZm: ",MeanRZm)
 
+Interval=np.ones((199,9))
 MeanCeil=np.around(np.copy(Mean))
 for j in range(9):
     for k in range(199):
