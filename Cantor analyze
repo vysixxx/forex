@@ -78,9 +78,12 @@ for j in range(9):
             Interval[k][j]=k
 Plot=[];IndexPlot=[]        
 for j in range(8):
-    for k in range(199):
-        if((Interval[k][j]>0)and(Interval[k-1][j]==0))or((Interval[k][j]>0)and(Interval[k-1][j]==0)):
-            Plot[k]=k
-            IndexPlot[j]=j
-        if(Interval[k][j]>0)and(Interval[k][j]==0):
+    for k in range(198):
+        if(Interval[k][j]==0):
+            continue
+        if(Interval[k][j]>0):
+            list.append(Plot,j)
+            list.append(IndexPlot,k)
+            if(Interval[k+1][j]==0):
+                plt.plot(Plot,IndexPlot)
 
