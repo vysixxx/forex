@@ -77,7 +77,7 @@ for j in range(9):
         else:
             Interval[k][j]=k
 Plot=[];IndexPlot=[]        
-for j in range(8):
+for j in range(9):
     for k in range(198):
         if(Interval[k][j]==0):
             continue
@@ -85,5 +85,6 @@ for j in range(8):
             list.append(Plot,j)
             list.append(IndexPlot,k)
             if(Interval[k+1][j]==0):
-                plt.plot(Plot,IndexPlot)
+                plt.plot(IndexPlot,Plot)
+                Plot=[];IndexPlot=[]
 
