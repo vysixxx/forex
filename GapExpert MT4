@@ -10,9 +10,9 @@
 extern int BE = 0;             // Posun na BE v bodech
 extern int BEPlus = 10;
 extern double Lots = 0.01;
-extern int RRRTP = 2;            /// RRR nasobek SL
+extern double RRRTP = 2;            /// RRR nasobek SL
 extern int CandleTimer = 3;       ///Počet svící po kterých příkaz zruší
-
+extern double ManualTPRRR = 0;         ///target=SL*x
 //--------------------------------------------------------------
 
 
@@ -70,9 +70,19 @@ int start()
                SLLong=High[2]-Low[2];
                LongSLPrice=Low[2]-0.0002;
                }         
-         TPLong=Close[1]-High[2];         
-         RRRL = TPLong/SLLong;
-         if(RRRL > RRRTP)  ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,Close[1]-0.0003,"expert comment",255,0,CLR_NONE);
+         if(RRRTP>0)
+            {
+            TPLong=Close[1]-High[2];         
+            RRRL = TPLong/SLLong;
+            if(RRRL > RRRTP)  ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,Close[1]-0.0003,"expert comment",255,0,CLR_NONE);
+            }
+         if(ManualTPRRR>0)
+            {
+            TPLong=(Close[1]-High[2])*ManualTPRRR;
+            Print("Long: ",TPLong,SLLong);
+            ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,High[2]+TPLong,"expert comment",255,0,CLR_NONE);
+            }   
+         
          //Print("Long: ",TPLong,SLLong);
         }
 
@@ -90,9 +100,19 @@ int start()
                SLShort=High[2]-Low[2];
                ShortSLPrice=High[2]+0.0006;
                }
-         TPShort=Low[2]-Close[1];
-         RRRS = TPShort/SLShort;
-         if(RRRS > RRRTP)  ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]+0.0006,"expert comment",255,0,CLR_NONE);
+         if(RRRTP>0)
+            {
+            TPShort=Low[2]-Close[1];
+            RRRS = TPShort/SLShort;
+            if(RRRS > RRRTP)  ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]+0.0006,"expert comment",255,0,CLR_NONE);
+            }
+         if(ManualTPRRR>0)
+            {
+            TPShort=Low[2]-Close[1]*ManualTPRRR;
+            Print("Short: ",TPShort,SLShort);
+            ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]-TPShort,"expert comment",255,0,CLR_NONE);
+            }   
+         
          
          //Print("Short: ",TPShort,SLShort);
         }
