@@ -13,6 +13,7 @@ extern double Lots = 0.01;
 extern double RRRTP = 2;            /// RRR nasobek SL
 extern int CandleTimer = 3;       ///Počet svící po kterých příkaz zruší
 extern double ManualTPRRR = 0;         ///target=SL*ManualTPRRR
+extern int CandleSL = 0;         // přitahování SL po svících, zatím jen po 1 svíci
 //--------------------------------------------------------------
 
 
@@ -151,6 +152,15 @@ int start()
                   }
                }
                }
+               
+             if(OrderProfit()>0 && CandleSL>0)
+               {
+               if((High[1] > High[2]) && (Close[1] > Close[2]))
+                  {
+                  OrderModify(OrderTicket(),OrderOpenPrice(),Low[1]-0.0004,OrderTakeProfit(),0);
+                  }
+               }  
+               
              }
         if(OrderType() == OP_SELL)
             {
@@ -197,19 +207,10 @@ int start()
      }
   
   
-  
-  
-  
-  
- 
-  
  
  }
  
     
-    
-   
-   
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -223,4 +224,4 @@ void NewBarH1() //detekováni nové svíce v D1
       New_Time=Time[0];
       TestH1=true;
      }
-  }
+}
