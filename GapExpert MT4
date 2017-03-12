@@ -7,12 +7,12 @@
 #property link      ""
 
 
-extern int BE = 0;             // Posun na BE v bodech
+extern double BE = 0;             // Posun na BE v %
 extern int BEPlus = 10;
 extern double Lots = 0.01;
 extern double RRRTP = 2;            /// RRR nasobek SL
 extern int CandleTimer = 3;       ///Počet svící po kterých příkaz zruší
-extern double ManualTPRRR = 0;         ///target=SL*x
+extern double ManualTPRRR = 0;         ///target=SL*ManualTPRRR
 //--------------------------------------------------------------
 
 
@@ -78,8 +78,8 @@ int start()
             }
          if(ManualTPRRR>0)
             {
-            TPLong=(Close[1]-High[2])*ManualTPRRR;
-            Print("Long: ",TPLong,SLLong);
+            TPLong=SLLong*ManualTPRRR;
+            Print("Long: ",TPLong);
             ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,High[2]+TPLong,"expert comment",255,0,CLR_NONE);
             }   
          
@@ -108,8 +108,8 @@ int start()
             }
          if(ManualTPRRR>0)
             {
-            TPShort=Low[2]-Close[1]*ManualTPRRR;
-            Print("Short: ",TPShort,SLShort);
+            TPShort=SLShort*ManualTPRRR;
+            Print("Short: ",TPShort);
             ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]-TPShort,"expert comment",255,0,CLR_NONE);
             }   
          
@@ -131,18 +131,22 @@ int start()
         if(OrderType() == OP_SELL || OrderType() == OP_SELLSTOP || OrderType() == OP_SELLLIMIT) k++;
         //if(OrderType() == OP_BUYSTOP && Close[0] <= LongDelete) OrderDelete(OrderTicket());
         //if(OrderType() == OP_SELLSTOP && Close[0] >= ShortDelete) OrderDelete(OrderTicket());
-        }
-        }
+        
+        
         
         
         if(OrderType() == OP_BUY)
             {
             if(BE > 0)
-               {
-               if(OrderStopLoss() < OrderOpenPrice())
                {               
-               if(Close[0] >= OrderOpenPrice() + (TPpips))
-                  {                  
+               if(OrderStopLoss() < OrderOpenPrice())
+               { 
+               double BERozd=(OrderTakeProfit()-OrderOpenPrice())*BE;
+               double BEPrice=OrderOpenPrice()+BERozd;
+               Print(BEPrice);          
+               if(Close[0] >= BEPrice)
+                  {
+                  Print("Posun na BE");                 
                   OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(OrderOpenPrice()+(BEPlus*Point),Digits),OrderTakeProfit(),0);                                    
                   }
                }
@@ -154,7 +158,9 @@ int start()
                {
                if(OrderStopLoss() > OrderOpenPrice())
                {
-               if(Close[0] <= OrderOpenPrice() - (TPpips))
+               BERozd=(OrderOpenPrice()-OrderTakeProfit())*BE;
+               BEPrice=OrderOpenPrice()-BERozd;
+               if(Close[0] <= BEPrice)
                   {                 
                   OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(OrderOpenPrice()-(BEPlus*Point),Digits),OrderTakeProfit(),0);                                                      
                   }
@@ -162,7 +168,8 @@ int start()
                }
                }
             }
-        
+        }
+        }
   
   
   //---Řízení otevřených obj.----------+
