@@ -15,8 +15,8 @@ extern int CandleTimer = 3;       //Počet svící po kterých příkaz zruší
 extern double ManualTPRRR = 0;    // target=SL*ManualTPRRR
 extern int CandleSL = 0;         // přitahování SL po svících, zatím jen po 1 svíci
 extern bool CandleSLnoTP = false;    // přitahování SL po svících bez targetu
-extern int MaxSL = 0;            // Maximalni SL
-extern int MinTP = 0;            // Minimalni target
+extern double MaxSL = 0;            // Maximalni SL
+extern double MinTP = 0;            // Minimalni target
 extern bool Trend = false;       // trend EMA 10 20 30
 extern int SumOpenTrade=100;     // maximalni pocet otevrenych obchodu
 
@@ -27,7 +27,7 @@ extern int SumOpenTrade=100;     // maximalni pocet otevrenych obchodu
 double TPpips,LongDelete,ShortDelete,TPLong,TPShort,SLLong,SLShort,NumberCandle,LongSLPrice,ShortSLPrice;
 bool TestH1,GAPDown,GAPUp,RazeniLong,RazeniShort;
 int i,j,k,ticket,Error;
-double Pips=0.2,Gap,RRRS,RRRL,EMA10,EMA20,EMA30;
+double Pips=0.2,Gap,RRRS,RRRL,EMA10,EMA20,EMA30,MaxSLEU,MinTPEU;
 
 //+------------------------------------------------------------------+
 //| expert initialization function                                   |
@@ -70,8 +70,9 @@ int start()
   if(EMA10<EMA20 && EMA20<EMA30)RazeniShort=true;
       else RazeniShort=false;
   
-  
-  
+  MaxSLEU=MaxSL/10000;
+  MinTPEU=MinTP/10000;
+  Print(MaxSLEU);
   
   if(Trend==false)
    {
@@ -80,13 +81,13 @@ int start()
    }
   
   
-  if(Close[1]>Open[1])
+  if(Close[1]>Open[1] && Close[1]>High[2])
         {
          Gap=Close[1]-High[2];
          
          if(Low[1]<Low[2])
             {
-            SLLong=High[2]-Low[1];
+            SLLong=High[2]-Low[2];
             LongSLPrice=Low[1]-0.0002;
             }
             else 
@@ -94,16 +95,16 @@ int start()
                SLLong=High[2]-Low[2];
                LongSLPrice=Low[2]-0.0002;
                }         
-         if(RRRTP>0)
+         if(RRRTP>0 && SLLong<=MaxSLEU)
             {
             TPLong=Close[1]-High[2];         
             RRRL = TPLong/SLLong;
             if(RRRL > RRRTP && RazeniLong==true)  ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,Close[1]-0.0003,"expert comment",255,0,CLR_NONE);
             }
-         if(ManualTPRRR>0)
+         if(ManualTPRRR>0 && SLLong<=MaxSLEU)
             {
             TPLong=SLLong*ManualTPRRR;
-            Print("Long: ",TPLong);
+            //Print("Long: ",TPLong);
             if(RazeniLong==true)ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,High[2]+TPLong,"expert comment",255,0,CLR_NONE);
             }
          if(CandleSLnoTP==true && RazeniLong==true)ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,0,"expert comment",255,0,CLR_NONE);
@@ -112,13 +113,13 @@ int start()
          //Print("Long: ",TPLong,SLLong);
         }
 
-      if(Close[1]<Open[1])
+      if(Close[1]<Open[1] && Close[1]<Low[2])
         {
-         Gap=Low[1]-Close[1];
+         Gap=Low[2]-Close[1];
          
          if(High[1]>High[2]) 
             {
-            SLShort=High[1]-Low[2];
+            SLShort=High[2]-Low[2];
             ShortSLPrice=High[1]+0.0006;
             }
             else 
@@ -126,16 +127,16 @@ int start()
                SLShort=High[2]-Low[2];
                ShortSLPrice=High[2]+0.0006;
                }
-         if(RRRTP>0)
+         if(RRRTP>0 && SLShort<=MaxSLEU)
             {
             TPShort=Low[2]-Close[1];
             RRRS = TPShort/SLShort;
             if(RRRS > RRRTP && RazeniShort==true)  ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]+0.0006,"expert comment",255,0,CLR_NONE);
             }
-         if(ManualTPRRR>0)
+         if(ManualTPRRR>0 && SLShort<=MaxSLEU)
             {
             TPShort=SLShort*ManualTPRRR;
-            Print("Short: ",TPShort);
+            //Print("Short: ",TPShort);
             if(RazeniShort==true)ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]-TPShort,"expert comment",255,0,CLR_NONE);
             }   
          
@@ -259,3 +260,5 @@ void NewBarH1() //detekováni nové svíce v D1
       TestH1=true;
      }
 }
+
+    
