@@ -10,18 +10,24 @@
 extern double BE = 0;             // Posun na BE v %
 extern int BEPlus = 10;
 extern double Lots = 0.01;
-extern double RRRTP = 2;            /// RRR nasobek SL
-extern int CandleTimer = 3;       ///Počet svící po kterých příkaz zruší
-extern double ManualTPRRR = 0;         ///target=SL*ManualTPRRR
+extern double RRRTP = 2;          // RRR nasobek SL
+extern int CandleTimer = 3;       //Počet svící po kterých příkaz zruší
+extern double ManualTPRRR = 0;    // target=SL*ManualTPRRR
 extern int CandleSL = 0;         // přitahování SL po svících, zatím jen po 1 svíci
+extern bool CandleSLnoTP = false;    // přitahování SL po svících bez targetu
+extern int MaxSL = 0;            // Maximalni SL
+extern int MinTP = 0;            // Minimalni target
+extern bool Trend = false;       // trend EMA 10 20 30
+extern int SumOpenTrade=100;     // maximalni pocet otevrenych obchodu
+
 //--------------------------------------------------------------
 
 
 
 double TPpips,LongDelete,ShortDelete,TPLong,TPShort,SLLong,SLShort,NumberCandle,LongSLPrice,ShortSLPrice;
-bool TestH1,GAPDown,GAPUp;
+bool TestH1,GAPDown,GAPUp,RazeniLong,RazeniShort;
 int i,j,k,ticket,Error;
-double Pips=0.2,Gap,RRRS,RRRL;
+double Pips=0.2,Gap,RRRS,RRRL,EMA10,EMA20,EMA30;
 
 //+------------------------------------------------------------------+
 //| expert initialization function                                   |
@@ -55,6 +61,23 @@ int start()
   if(TestH1 == true)
   {
   
+  EMA10 = iMA(NULL,0,10,0,MODE_EMA,PRICE_CLOSE,1);
+  EMA20 = iMA(NULL,0,20,0,MODE_EMA,PRICE_CLOSE,1);
+  EMA30 = iMA(NULL,0,30,0,MODE_EMA,PRICE_CLOSE,1);
+  //-------------- Řazení EMA
+  if(EMA10>EMA20 && EMA20>EMA30)RazeniLong=true;
+      else RazeniLong=false;
+  if(EMA10<EMA20 && EMA20<EMA30)RazeniShort=true;
+      else RazeniShort=false;
+  
+  
+  
+  
+  if(Trend==false)
+   {
+   RazeniLong=true;
+   RazeniShort=true;
+   }
   
   
   if(Close[1]>Open[1])
@@ -75,14 +98,16 @@ int start()
             {
             TPLong=Close[1]-High[2];         
             RRRL = TPLong/SLLong;
-            if(RRRL > RRRTP)  ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,Close[1]-0.0003,"expert comment",255,0,CLR_NONE);
+            if(RRRL > RRRTP && RazeniLong==true)  ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,Close[1]-0.0003,"expert comment",255,0,CLR_NONE);
             }
          if(ManualTPRRR>0)
             {
             TPLong=SLLong*ManualTPRRR;
             Print("Long: ",TPLong);
-            ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,High[2]+TPLong,"expert comment",255,0,CLR_NONE);
-            }   
+            if(RazeniLong==true)ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,High[2]+TPLong,"expert comment",255,0,CLR_NONE);
+            }
+         if(CandleSLnoTP==true && RazeniLong==true)ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0007,0,LongSLPrice,0,"expert comment",255,0,CLR_NONE);
+                 
          
          //Print("Long: ",TPLong,SLLong);
         }
@@ -105,16 +130,16 @@ int start()
             {
             TPShort=Low[2]-Close[1];
             RRRS = TPShort/SLShort;
-            if(RRRS > RRRTP)  ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]+0.0006,"expert comment",255,0,CLR_NONE);
+            if(RRRS > RRRTP && RazeniShort==true)  ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]+0.0006,"expert comment",255,0,CLR_NONE);
             }
          if(ManualTPRRR>0)
             {
             TPShort=SLShort*ManualTPRRR;
             Print("Short: ",TPShort);
-            ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]-TPShort,"expert comment",255,0,CLR_NONE);
+            if(RazeniShort==true)ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,Close[1]-TPShort,"expert comment",255,0,CLR_NONE);
             }   
          
-         
+         if(CandleSLnoTP==true && RazeniShort==true)ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0004,0,ShortSLPrice,0,"expert comment",255,0,CLR_NONE);
          //Print("Short: ",TPShort,SLShort);
         }
   
@@ -155,7 +180,7 @@ int start()
                
              if(OrderProfit()>0 && CandleSL>0)
                {
-               if((High[1] > High[2]) && (Close[1] > Close[2]))
+               if(Low[1] > Low[2])
                   {
                   OrderModify(OrderTicket(),OrderOpenPrice(),Low[1]-0.0004,OrderTakeProfit(),0);
                   }
@@ -175,8 +200,17 @@ int start()
                   OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(OrderOpenPrice()-(BEPlus*Point),Digits),OrderTakeProfit(),0);                                                      
                   }
              
+               }           
                }
-               }
+            if(OrderProfit()>0 && CandleSL>0)
+               {
+               if(High[1] < High[2])
+                  {
+                  OrderModify(OrderTicket(),OrderOpenPrice(),High[1]+0.0007,OrderTakeProfit(),0);
+                  }
+               }   
+               
+               
             }
         }
         }
