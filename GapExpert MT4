@@ -72,7 +72,7 @@ int start()
   
   MaxSLEU=MaxSL/10000;
   MinTPEU=MinTP/10000;
-  Print(MaxSLEU);
+  //Print(MaxSLEU);
   
   if(Trend==false)
    {
@@ -94,7 +94,8 @@ int start()
                {
                SLLong=High[2]-Low[2];
                LongSLPrice=Low[2]-0.0002;
-               }         
+               }
+         //Print("SLLong: ",SLLong);              
          if(RRRTP>0 && SLLong<=MaxSLEU)
             {
             TPLong=Close[1]-High[2];         
@@ -127,6 +128,7 @@ int start()
                SLShort=High[2]-Low[2];
                ShortSLPrice=High[2]+0.0006;
                }
+         //Print("SLShort: ",SLShort);      
          if(RRRTP>0 && SLShort<=MaxSLEU)
             {
             TPShort=Low[2]-Close[1];
@@ -170,7 +172,7 @@ int start()
                { 
                double BERozd=(OrderTakeProfit()-OrderOpenPrice())*BE;
                double BEPrice=OrderOpenPrice()+BERozd;
-               Print(BEPrice);          
+               Print("BEPriceLong: ",BEPrice);          
                if(Close[0] >= BEPrice)
                   {
                   Print("Posun na BE");                 
@@ -193,11 +195,13 @@ int start()
             if(BE > 0)
                {
                if(OrderStopLoss() > OrderOpenPrice())
-               {
+               {               
                BERozd=(OrderOpenPrice()-OrderTakeProfit())*BE;
                BEPrice=OrderOpenPrice()-BERozd;
+               Print("BEPriceShort: ",BEPrice);
                if(Close[0] <= BEPrice)
-                  {                 
+                  {
+                  Print("Posun na BE");                 
                   OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(OrderOpenPrice()-(BEPlus*Point),Digits),OrderTakeProfit(),0);                                                      
                   }
              
@@ -226,7 +230,7 @@ int start()
         if(OrderType() ==  OP_BUYLIMIT) 
          {
          NumberCandle=(TimeCurrent()-OrderOpenTime())/(Period()*60);
-         Print(NumberCandle);
+         //Print(NumberCandle);
          if(NumberCandle>=CandleTimer)OrderDelete(OrderTicket());
          }
         if(OrderType()  == OP_SELLLIMIT) 
@@ -260,5 +264,3 @@ void NewBarH1() //detekováni nové svíce v D1
       TestH1=true;
      }
 }
-
-    
