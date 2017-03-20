@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.finance as mpl_finance
 
-series = pd.read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/EURUSD.txt', 
+series = pd.read_csv('C:/Program Files/MetaTrader 4 Admiral Markets AS DAX/MQL4/Files/EURUSD.txt', 
                      header=1, parse_dates=None, index_col=0, squeeze=True)
 
 fig, ax = plt.subplots()
@@ -19,11 +19,25 @@ mpl_finance.candlestick2_ohlc(ax,series['OPEN'] ,series['HIGH'] ,series['LOW'] ,
                               series['CLOSE'], width=2, colorup='g', colordown='r', alpha=0.75)
 plt.show()
 
-for i in range(199):
-    if(series.CLOSE[i]>series.OPEN[i]):
+MeanCandleHL=(np.mean(series["HIGH"])-np.mean(series["LOW"]))
+MultiMeanHL=1.5*MeanCandleHL
+
+pocitadlo=0;ZiskSum=0;ZiskSumBuy=0;ZiskSumSell=0
+for i in range(999):    
         CL=series.CLOSE[i]-series.LOW[i]
         HL=series.HIGH[i]-series.LOW[i]
-        if(CL/HL>0.8):
+        OL=series.OPEN[i]-series.LOW[i]
+        if(CL/HL>0.8)and(HL>MultiMeanHL):
             print("bull close u high: ",series.index[i])
-            Zisk1=(series.CLOSE[i+1]-series.OPEN[i])*10000
-            print("Zisk1= :",Zisk1)
+            Zisk1=(series.CLOSE[i+1]-series.CLOSE[i])*10000
+            ZiskSumBuy=ZiskSumBuy+Zisk1
+            pocitadlo=pocitadlo+1
+            print("ZiskBuy= :",ZiskSumBuy,", pocet: ",pocitadlo)
+        if(CL/HL<0.2)and(HL>MultiMeanHL):
+            print("sell close u low: ",series.index[i])
+            Zisk2=(series.CLOSE[i]-series.CLOSE[i+1])*10000
+            ZiskSumSell=ZiskSumSell+Zisk2
+            pocitadlo=pocitadlo+1
+            ZiskSum=ZiskSumSell+ZiskSumBuy
+            print("ZiskSell= :",ZiskSumSell,", pocet: ",pocitadlo)   
+    
