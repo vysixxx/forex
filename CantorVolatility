@@ -1,0 +1,34 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 21 08:03:44 2017
+
+@author: uživatel
+"""
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+series = pd.read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/AUDUSD.txt', 
+                     header=1, parse_dates=None, index_col=0, squeeze=True)
+
+seriesClose=series['CLOSE'];seriesHigh=series['HIGH'];seriesLow=series['LOW']
+Close=np.array(len(seriesClose));High=np.array(len(seriesHigh));Low=np.array(len(seriesLow))
+Close=np.copy(seriesClose);High=np.copy(seriesHigh);Low=np.copy(seriesLow)
+VolClose=np.absolute(np.ediff1d(Close)*10000)
+VolHL=(High-Low)*10000
+MeanHL=np.mean(VolHL);MeanClose=np.mean(VolClose)
+#MaxClose=np.argmax(VolClose);MinClose=np.argmin(VolClose)
+#MaxHL=np.argmax(VolHL);MinHL=np.argmin(VolHL)
+VolCloseDivMean=VolClose/MeanClose;VolHLDivMean=VolHL/MeanHL
+
+CloseMeanCeil=[];Pocty=[]
+for i in range(199):    
+    for j in range(6):
+        if(VolCloseDivMean[i]<j+1)and(VolCloseDivMean[i]>=j):
+            list.append(CloseMeanCeil,j)
+            Pocty[j]=Pocty[j]+1
+            
+N=len(CloseMeanCeil)
+x=range(N)
+plt.bar(x,CloseMeanCeil, 1, color="blue")            
