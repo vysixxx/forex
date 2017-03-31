@@ -12,7 +12,9 @@ extern int BEPlus = 10;
 extern double Lots = 0.01;
 extern int CandleTimer = 3;       //Počet svící po kterých příkaz zruší
 extern bool Trend = false;
-extern int CandleSL=0;              // Pritahovani po x svicich
+extern int CandleSL= 0;           // Pritahovani po x svicich
+extern double NasobekTP= 1;
+extern double MaxSL= 100;           // max SL v pipsech             
 
 //--------------------------------------------------------------
 
@@ -21,7 +23,7 @@ extern int CandleSL=0;              // Pritahovani po x svicich
 
 bool TestH1,RazeniLong,RazeniShort;
 int i,j,k,ticket,Error,NumberCandle;
-double EMA10,EMA20,EMA30,TP;
+double EMA10,EMA20,EMA30,TP,SL,SLMax;
 
 //+------------------------------------------------------------------+
 //| expert initialization function                                   |
@@ -54,7 +56,7 @@ int start()
   NewBarH1();
   if(TestH1 == true)
   {
-  
+  //------------Trend-----------------------------------
   EMA10 = iMA(NULL,0,10,0,MODE_EMA,PRICE_CLOSE,1);
   EMA20 = iMA(NULL,0,20,0,MODE_EMA,PRICE_CLOSE,1);
   EMA30 = iMA(NULL,0,30,0,MODE_EMA,PRICE_CLOSE,1);
@@ -62,26 +64,38 @@ int start()
   if(EMA10>EMA20 && EMA20>EMA30)RazeniLong=true;
       else RazeniLong=false;
   if(EMA10<EMA20 && EMA20<EMA30)RazeniShort=true;
-      else RazeniShort=false;
-  
-  
-  
+      else RazeniShort=false;  
   if(Trend==false)
    {
    RazeniLong=true;
    RazeniShort=true;
    }
+   SLMax=MaxSL/10000;
+   Print("SLMax: ",SLMax);
+  //---------------------------------------------------
   
-  
-  if(Close[2]>Open[2] && Close[2]>High[3] && Low[1]>High[3] && Close[1]<High[2])
+  if(Close[2]>Open[2] && Close[2]>High[3] && Low[1]>High[3])
         {
-        TP=(High[1]-Low[2])+0.0009;
-        ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0007,0,Low[2]-0.0002,High[2]+TP,"expert comment",255,0,CLR_NONE);
+        SL=(High[1]-Low[2])+0.0007;
+        Print("SLLong: ",SL);
+        TP=((High[1]-Low[2])*NasobekTP)+0.0007;
+        // podminky pro vstup
+        if(RazeniLong==true && SLMax>=SL)
+            {
+            ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[2]-0.0002,High[2]+TP,"expert comment",255,0,CLR_NONE);
+            }
         }
 
-      if(Close[1]<Open[1] && Close[1]<Low[2])
+      if(Close[2]<Open[2] && Close[2]<Low[3] && High[1]<Low[3])
         {
-         
+        SL=(High[2]-Low[1])+0.0007;
+        Print("SLShort: ",SL);
+        TP=((High[2]-Low[1])*NasobekTP)+0.0007;        
+        // podminky pro vstup
+        if(RazeniShort==true && SLMax>=SL)
+            {
+            ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0002,0,High[2]+0.0005,Low[2]-TP,"expert comment",255,0,CLR_NONE);
+            } 
         }
   
 //----------------------------------------------  
