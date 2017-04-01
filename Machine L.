@@ -1,0 +1,34 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Apr  1 06:29:44 2017
+
+@author: uživatel
+"""
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+#Charakteristiky:    
+#   1)Tvar predchazejicich svici - stoupajici, klesajici, INsidy,OUTsidy
+#   2)Volume
+#   3)EMA
+#
+#
+series = pd.read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/AUDUSD.txt', 
+                     header=1, parse_dates=None, index_col=0, squeeze=True)
+
+ZelenaSvInd=[];Soucet=0
+for i in range(len(series)):
+    if(series.CLOSE[i]-series.OPEN[i]>0):
+        list.append(ZelenaSvInd,series.index[i])
+        Soucet=Soucet+(series.CLOSE[i]-series.OPEN[i])
+        
+Mean=Soucet/len(ZelenaSvInd)
+Counter=0;ZelSvIndMean=[]
+for i in range(len(series)):
+    for j in range(len(ZelenaSvInd)):
+        if(series.index[i]==ZelenaSvInd[j])and(series.CLOSE[i]-series.OPEN[i]>Mean*2):
+            list.append(ZelSvIndMean,series.index[i])
+            
+            Counter=Counter+1
+print(Counter) 
