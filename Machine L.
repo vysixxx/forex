@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Apr  1 06:29:44 2017
+Created on Fri Mar 31 20:45:47 2017
 
-@author: uživatel
+@author: VysiXXX
 """
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -14,7 +15,14 @@ import numpy as np
 #   3)EMA
 #
 #
-series = pd.read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/AUDUSD.txt', 
+
+#---------Funkce
+def StoupKles(n):
+    if(series.CLOSE[i-n]-series.OPEN[i-n]>0):
+        return 1
+    else: return 0
+    
+series = pd.read_csv('C:/Program Files/MetaTrader 4 Admiral Markets AS DAX/MQL4/Files/EURUSD.txt', 
                      header=1, parse_dates=None, index_col=0, squeeze=True)
 
 ZelenaSvInd=[];Soucet=0
@@ -29,6 +37,13 @@ for i in range(len(series)):
     for j in range(len(ZelenaSvInd)):
         if(series.index[i]==ZelenaSvInd[j])and(series.CLOSE[i]-series.OPEN[i]>Mean*2):
             list.append(ZelSvIndMean,series.index[i])
-            
+            n=3
+            while n > 0:
+                StoupKles(n)
+                print(StoupKles)
+                n-=1
             Counter=Counter+1
-print(Counter) 
+print(Counter)
+
+    
+            
