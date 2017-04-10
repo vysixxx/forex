@@ -1,0 +1,28 @@
+library(e1071)
+dataDirectory <- "C:/TradePictures/"
+data <- read.csv(paste(dataDirectory, 'test1.csv', sep=""), header = TRUE)
+plot(data, pch=16)
+model <- lm(Y ~ X, data)
+abline(model)
+predictedY <- predict(model, data)
+points(data$X, predictedY, col = "blue", pch=4)
+rmse <- function(error)
+{
+  sqrt(mean(error^2))
+}
+ 
+error <- model$residuals
+predictionRMSE <- rmse(error)
+model <- svm(Y ~ X , data)
+ 
+predictedY <- predict(model, data)
+ 
+points(data$X, predictedY, col = "red", pch=4)
+error <- data$Y - predictedY
+svrPredictionRMSE <- rmse(error)
+tuneResult <- tune(svm, Y ~ X,  data = data,
+              ranges = list(epsilon = seq(0,1,0.1), cost = 2^(2:9))
+)
+print(tuneResult)
+# best performance: MSE = 8.371412, RMSE = 2.89 epsilon 1e-04 cost 4
+# Draw the tuning graph
