@@ -1,4 +1,4 @@
- //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
 //|                                                    GapExpert.mq4 |
 //|                                                          VysiXXX |
 //|                                                                  |
@@ -15,7 +15,7 @@ extern bool Trend = false;
 extern int CandleSL= 0;           // Pritahovani po x svicich
 extern double NasobekTP= 1;
 extern double MaxSL= 100;           // max SL v pipsech             
-
+extern int PevnyTP = 10;            // pevny TP
 //--------------------------------------------------------------
 
 
@@ -91,25 +91,31 @@ int start()
         //Print("SLLong: ",SL);
         TP=SLPips*NasobekTP;
         // podminky pro vstup
-        
-        ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0005,0,SL,High[2]+TP,"expert comment",255,0,CLR_NONE);
+        if(PevnyTP>0)
+         {
+         TP=PevnyTP/10000;
+         }
+        ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0005,0,SL,High[2]+TP,"8hours",255,0,CLR_NONE);
         if(ticket<1)
             {
-            ticket=OrderSend(Symbol(),OP_BUY,Lots,Ask,0,SL,High[2]+TP,"expert comment",255,0,CLR_NONE);
+            ticket=OrderSend(Symbol(),OP_BUY,Lots,Ask,0,SL,High[2]+TP,"8hours",255,0,CLR_NONE);
             }
             
         }
+   if(PevnyTP==0)
+   {     
    if(Low[1]>Low[2] && High[1]<High[2] && RazeniLong==true)
       {
       SL=Low[2]-0.0002;
       SLPips=(High[1]+0.0005)-(Low[2]-0.0002);
       TP=SLPips*NasobekTP;
-      ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,SL,High[1]+TP,"expert comment",255,0,CLR_NONE);
+      ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,SL,High[1]+TP,"INside",255,0,CLR_NONE);
       if(ticket<1)
             {
-            ticket=OrderSend(Symbol(),OP_BUY,Lots,Ask,0,SL,High[1]+TP,"expert comment",255,0,CLR_NONE);
+            ticket=OrderSend(Symbol(),OP_BUY,Lots,Ask,0,SL,High[1]+TP,"INside",255,0,CLR_NONE);
             }
       }
+   }   
    
    //------------------------ short
    if(Close[1]<Open[1] && Close[1]<Low[2] && RazeniShort==true)
@@ -127,26 +133,31 @@ int start()
         //Print("SLLong: ",SL);
         TP=SLPips*NasobekTP;
         // podminky pro vstup
-        
-        ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0005,0,SL,Low[2]-TP,"expert comment",255,0,CLR_NONE);
+        if(PevnyTP>0)
+         {
+         TP=PevnyTP/10000;
+         }
+        ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0005,0,SL,Low[2]-TP,"8hours",255,0,CLR_NONE);
         if(ticket<1)
             {
-            ticket=OrderSend(Symbol(),OP_SELL,Lots,Bid,0,SL,Low[2]-TP,"expert comment",255,0,CLR_NONE);
+            ticket=OrderSend(Symbol(),OP_SELL,Lots,Bid,0,SL,Low[2]-TP,"8hours",255,0,CLR_NONE);
             }
             
         }
+   if(PevnyTP==0)
+   {    
    if(Low[1]>Low[2] && High[1]<High[2] && RazeniShort==true)
       {
       SL=High[2]+0.0005;
       SLPips=(High[2]+0.0005)-(Low[1]-0.0002);
       TP=SLPips*NasobekTP;
-      ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0002,0,SL,Low[1]-TP,"expert comment",255,0,CLR_NONE);
+      ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0002,0,SL,Low[1]-TP,"INside",255,0,CLR_NONE);
       if(ticket<1)
             {
-            ticket=OrderSend(Symbol(),OP_SELL,Lots,Bid,0,SL,Low[1]-TP,"expert comment",255,0,CLR_NONE);
+            ticket=OrderSend(Symbol(),OP_SELL,Lots,Bid,0,SL,Low[1]-TP,"INside",255,0,CLR_NONE);
             }
       }
-   
+   }
       
   }
 //----------------------------------------------  
