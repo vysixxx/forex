@@ -15,7 +15,9 @@ extern bool Trend = false;
 extern int CandleSL= 0;           // Pritahovani po x svicich
 extern double NasobekTP= 1;
 extern double MaxSL= 100;           // max SL v pipsech             
-extern int PevnyTP = 10;            // pevny TP
+extern double PevnyTP = 10;            // pevny TP
+extern bool TPClose1=true;        // target na close signální
+
 //--------------------------------------------------------------
 
 
@@ -95,12 +97,23 @@ int start()
          {
          TP=PevnyTP/10000;
          }
+        if(TPClose1==true)
+         {
+         TP=Close[1];
+         ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0005,0,SL,TP,"8hours",255,0,CLR_NONE);
+         if(ticket<1)
+            {
+            ticket=OrderSend(Symbol(),OP_BUY,Lots,Ask,0,SL,TP,"8hours",255,0,CLR_NONE);
+            }
+         }
+        if(TPClose1==false)
+        {  
         ticket=OrderSend(Symbol(),OP_BUYLIMIT,Lots,High[2]+0.0005,0,SL,High[2]+TP,"8hours",255,0,CLR_NONE);
         if(ticket<1)
             {
             ticket=OrderSend(Symbol(),OP_BUY,Lots,Ask,0,SL,High[2]+TP,"8hours",255,0,CLR_NONE);
             }
-            
+        }    
         }
    if(PevnyTP==0)
    {     
@@ -137,12 +150,23 @@ int start()
          {
          TP=PevnyTP/10000;
          }
+        if(TPClose1==true)
+         {
+         TP=Close[1];
+         ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0005,0,SL,TP,"8hours",255,0,CLR_NONE);
+         if(ticket<1)
+            {
+            ticket=OrderSend(Symbol(),OP_SELL,Lots,Bid,0,SL,TP,"8hours",255,0,CLR_NONE);
+            }
+         }
+        if(TPClose1==false)
+        {  
         ticket=OrderSend(Symbol(),OP_SELLLIMIT,Lots,Low[2]-0.0005,0,SL,Low[2]-TP,"8hours",255,0,CLR_NONE);
         if(ticket<1)
             {
             ticket=OrderSend(Symbol(),OP_SELL,Lots,Bid,0,SL,Low[2]-TP,"8hours",255,0,CLR_NONE);
             }
-            
+        }    
         }
    if(PevnyTP==0)
    {    
