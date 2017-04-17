@@ -1,13 +1,14 @@
 library(e1071)
-dataDirectory <- "C:/Program Files/MetaTrader 4 Admiral Markets AS DAX/MQL4/Files/"
+dataDirectory <- "C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/"
 dataLoad <- read.csv(paste(dataDirectory, 'NZDUSD240.csv', sep=""), header = TRUE)
 Diff <- (c(30))
+UpOrDown <- (c(30))
 for(i in 1:30){
 
 data <- dataLoad[i:(i+19),]
 test <- dataLoad[i+20,]
 
-
+ 
 
 rmse <- function(error)
 {
@@ -57,35 +58,35 @@ if(require(e1071)){
 FX <- predict(tunedModel, newdata = test)
 print(test)
 print(FX)
-Diff(i) <- (test[1,2]-FX)*10000
+Diff[i] <- (test[1,2]-FX)*10000
 print(Diff)
 
+if((dataLoad[i+20,2]>dataLoad[i+19,2]) && (FX>dataLoad[i+19,2])){
+		UpOrDown[i] <- 1}
+else{UpOrDown[i] <- 0}
+if((dataLoad[i+20,2]<dataLoad[i+19,2]) && (FX<dataLoad[i+19,2])){
+		UpOrDown[i] <- 1}
+else{UpOrDown[i] <- 0}
+
 }
+print(UpOrDown)
 # end of Close model =======================================
 
-dataDirectory <- "C:/Program Files/MetaTrader 4 Admiral Markets AS DAX/MQL4/Files/"
-dataLoad <- read.csv(paste(dataDirectory, 'NZDUSDV240.csv', sep=""), header = TRUE)
-Diff <- (c(30))
+
+
+# Vol model ==============================================
+dataDirectory <- "C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/"
+dataLoad <- read.csv(paste(dataDirectory, 'NZDUSDVol.csv', sep=""), header = TRUE)
+DiffV <- (c(30))
 for(i in 1:30){
 
 data <- dataLoad[i:(i+19),]
 test <- dataLoad[i+20,]
-
-
 
 rmse <- function(error)
 {
   sqrt(mean(error^2))
 }
-
-# svr model ==============================================
-dataDirectory <- "C:/Program Files/MetaTrader 4 Admiral Markets AS DAX/MQL4/Files/"
-dataLoad <- read.csv(paste(dataDirectory, 'NZDUSDVVol.csv', sep=""), header = TRUE)
-Diff <- (c(30))
-for(i in 1:30){
-
-data <- dataLoad[i:(i+19),]
-test <- dataLoad[i+20,]
 
 if(require(e1071)){
   
@@ -129,8 +130,8 @@ if(require(e1071)){
 FX <- predict(tunedModel, newdata = test)
 print(test)
 print(FX)
-Diff(i) <- (test[1,2]-FX)*10000
-print(Diff)
+DiffV[i] <- (test[1,2]-FX)
+print(DiffV)
 
 }
 # end of Vol model =======================================
