@@ -1,137 +1,84 @@
 library(e1071)
-dataDirectory <- "C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/"
-dataLoad <- read.csv(paste(dataDirectory, 'NZDUSD240.csv', sep=""), header = TRUE)
-Diff <- (c(40))
-UpOrDown <- (c(40))
-for(i in 1:40){
 
-data <- dataLoad[i:(i+9),]
-test <- dataLoad[i+10,]
+Price <- (c(4))
 
+
+# funkce na predikci ==============================================
+NextPrice <- function(data,test){
+rmse <- function(error)
+{
+  sqrt(mean(error^2))
+}
+
+
+
+
+if(require(e1071)){
+  
+  
+  model <- svm(Y ~ X , data)
+  
+  predictedY <- predict(model, data)
+  
+  #points(data$X, predictedY, col = "red", pch=17)
+  
+  
+  error <- data$Y - predictedY  # /!\ this time  svrModel$residuals  is not the same as data$Y - predictedY
+  svrPredictionRMSE <- rmse(error)  # 3.157061 
+  
+    
+  tuneResult <- tune(svm, Y ~ X,  data = data, 
+                ranges = list(epsilon = seq(0,1,0.1), cost = 2^(2:9))
+  ) 
+  print(tuneResult) # best performance
+   
+  
+  tuneResult <- tune(svm, Y ~ X,  data = data, 
+                     ranges = list(epsilon = seq(0,0.2,0.01), cost = 2^(2:9))
+  ) 
+  
+  print(tuneResult) 
+  
+  tunedModel <- tuneResult$best.model
+  tunedModelY <- predict(tunedModel, data) 
+  
  
-
-rmse <- function(error)
-{
-  sqrt(mean(error^2))
-}
-
-# svr model ==============================================
-if(require(e1071)){
-  
-  
-  model <- svm(Y ~ X , data)
-  
-  predictedY <- predict(model, data)
-  
-  #points(data$X, predictedY, col = "red", pch=17)
-  
-  
-  error <- data$Y - predictedY  # /!\ this time  svrModel$residuals  is not the same as data$Y - predictedY
-  svrPredictionRMSE <- rmse(error)  # 3.157061 
-  
-    
-  tuneResult <- tune(svm, Y ~ X,  data = data, 
-                ranges = list(epsilon = seq(0,1,0.1), cost = 2^(2:9))
-  ) 
-  print(tuneResult) # best performance
-   
-  
-  tuneResult <- tune(svm, Y ~ X,  data = data, 
-                     ranges = list(epsilon = seq(0,0.2,0.01), cost = 2^(2:9))
-  ) 
-  
-  print(tuneResult) 
-  
-  
-  
-  tunedModel <- tuneResult$best.model
-  tunedModelY <- predict(tunedModel, data) 
-  
-  
   
   error <- data$Y - tunedModelY  
   
   # this value can  be different because the best model is determined by cross-validation over randomly shuffled data 
-  tunedModelRMSE <- rmse(error)  # 2.219642 
+  tunedModelRMSE <- rmse(error)   
 } 
 
 FX <- predict(tunedModel, newdata = test)
-print(test)
-print(FX)
-Diff[i] <- (test[1,2]-FX)*10000
-print(Diff)
-
-if(((dataLoad[i+10,2]>dataLoad[i+9,2]) && (FX>dataLoad[i+9,2]))||((dataLoad[i+10,2]<dataLoad[i+9,2]) && (FX<dataLoad[i+9,2]))){
-		UpOrDown[i] <- 1}
-else{UpOrDown[i] <- 0}
-
+return(FX)
 }
-print(UpOrDown)
-# end of Close model =======================================
 
-
-
-# Vol model ==============================================
 dataDirectory <- "C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/"
-dataLoad <- read.csv(paste(dataDirectory, 'NZDUSDVol.csv', sep=""), header = TRUE)
-DiffV <- (c(40))
-for(i in 1:40){
 
-data <- dataLoad[i:(i+9),]
-test <- dataLoad[i+10,]
+dataLoad <- read.csv(paste(dataDirectory, 'EURUSDVol60.csv', sep=""), header = TRUE)
+data <- dataLoad[1:10,]
+test <- dataLoad[11,]
+PriceM60 <- NextPrice(data,test)
 
-rmse <- function(error)
-{
-  sqrt(mean(error^2))
-}
+dataLoad <- read.csv(paste(dataDirectory, 'EURUSDVol240.csv', sep=""), header = TRUE)
+data <- dataLoad[1:10,]
+test <- dataLoad[11,]
+PriceM240 <- NextPrice(data,test)
 
-if(require(e1071)){
-  
-  
-  model <- svm(Y ~ X , data)
-  
-  predictedY <- predict(model, data)
-  
-  #points(data$X, predictedY, col = "red", pch=17)
-  
-  
-  error <- data$Y - predictedY  # /!\ this time  svrModel$residuals  is not the same as data$Y - predictedY
-  svrPredictionRMSE <- rmse(error)  # 3.157061 
-  
-    
-  tuneResult <- tune(svm, Y ~ X,  data = data, 
-                ranges = list(epsilon = seq(0,1,0.1), cost = 2^(2:9))
-  ) 
-  print(tuneResult) # best performance
-   
-  
-  tuneResult <- tune(svm, Y ~ X,  data = data, 
-                     ranges = list(epsilon = seq(0,0.2,0.01), cost = 2^(2:9))
-  ) 
-  
-  print(tuneResult) 
-  
-  
-  
-  tunedModel <- tuneResult$best.model
-  tunedModelY <- predict(tunedModel, data) 
-  
-  
-  
-  error <- data$Y - tunedModelY  
-  
-  # this value can  be different because the best model is determined by cross-validation over randomly shuffled data 
-  tunedModelRMSE <- rmse(error)  # 2.219642 
-} 
+dataLoad <- read.csv(paste(dataDirectory, 'EURUSD60.csv', sep=""), header = TRUE)
+data <- dataLoad[1:10,]
+test <- dataLoad[11,]
+Price[3] <- NextPrice(data,test)
+Price[1] <- PriceM60+dataLoad[10,2]
 
-FX <- predict(tunedModel, newdata = test)
-print(test)
-print(FX)
-DiffV[i] <- (test[1,2]-FX)
-print(DiffV)
+dataLoad <- read.csv(paste(dataDirectory, 'EURUSD240.csv', sep=""), header = TRUE)
+data <- dataLoad[1:10,]
+test <- dataLoad[11,]
+Price[4] <- NextPrice(data,test)
+Price[2] <- PriceM240+dataLoad[10,2]
 
-}
-# end of Vol model =======================================
-print(Diff)
-print(DiffV)
-print(UpOrDown)
+data.frame(test=c("Vol60","Vol240","Price60","Price240"),Price=c(Price))
+# end of svr model =======================================
+
+write.csv(pr,file="C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/EU.csv")
