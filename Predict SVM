@@ -1,7 +1,7 @@
 library(e1071)
 
 
-Price <- (c(4))
+
 
 # funkce na predikci ==============================================
 NextPrice <- function(data,test){
