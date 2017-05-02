@@ -1,12 +1,19 @@
 library(e1071)
-dataDirectory <- "C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/"
-dataLoad <- read.csv(paste(dataDirectory, 'EURUSD240.csv', sep=""), header = TRUE)
+dataDirectory <- "C:/Program Files/MetaTrader 4 Admiral Markets AS DAX/MQL4/Files/"
+dataLoad <- read.csv(paste(dataDirectory, 'NZDUSD240.csv', sep=""), header = TRUE)
 Diff <- (c(30))
 UpOrDown <- (c(30))
+realPrice <- 1:40
+dim(realPrice) <- c(20,2)
+predPrice <- 1:40
+dim(predPrice) <- c(20,2)
+predPriceVol <- 1:40
+dim(predPriceVol) <- c(20,2)
+
 for(i in 1:20){
 
-data <- dataLoad[i:(i+9),]
-test <- dataLoad[i+10,]
+data <- dataLoad[i:(i+4),]
+test <- dataLoad[i+5,]
 
  
 
@@ -60,25 +67,28 @@ print(test)
 print(FX)
 Diff[i] <- (test[1,2]-FX)*10000
 print(Diff)
+realPrice[i,2] <- test[1,2]
+predPrice[i,2] <- FX
+
 
 if(((dataLoad[i+10,2]>dataLoad[i+9,2]) && (FX>dataLoad[i+9,2]))||((dataLoad[i+10,2]<dataLoad[i+9,2]) && (FX<dataLoad[i+9,2]))){
 		UpOrDown[i] <- 1}
 else{UpOrDown[i] <- 0}
 
 }
-print(UpOrDown)
 # end of Close model =======================================
-
-
+plot(realPrice,type="l")
+points(predPrice,pch=20,col="red")
 
 # Vol model ==============================================
-dataDirectory <- "C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/"
-dataLoad <- read.csv(paste(dataDirectory, 'EURUSDVol240.csv', sep=""), header = TRUE)
+dataDirectory <- "C:/Program Files/MetaTrader 4 Admiral Markets AS DAX/MQL4/Files/"
+dataLoad <- read.csv(paste(dataDirectory, 'NZDUSDVol240.csv', sep=""), header = TRUE)
+
 DiffV <- (c(30))
 for(i in 1:20){
 
-data <- dataLoad[i:(i+9),]
-test <- dataLoad[i+10,]
+data <- dataLoad[i:(i+4),]
+test <- dataLoad[i+5,]
 
 rmse <- function(error)
 {
@@ -133,5 +143,9 @@ print(DiffV)
 }
 # end of Vol model =======================================
 HitUD <- (sum(UpOrDown)/length(UpOrDown))*100
-message("uspesnost predpovedi smeru: ", HitUD,"%")
+avgDiffClose <- (sum(abs(Diff))/length(Diff))
+avgDiffCloseVol <- (sum(abs(DiffV))/length(DiffV))
+message("uspesnost predpovedi smeru dle Close: ", HitUD,"%")
+message("prumerna odchylka podle Close: ", avgDiffClose,"pips")
+message("prumerna odchylka podle volatility: ", avgDiffCloseVol,"pips")
 data.frame(test=c(1:20),Diff=c(Diff),DiffV=c(DiffV),UoD=c(UpOrDown))
