@@ -1,0 +1,222 @@
+//+------------------------------------------------------------------+
+//|                                                    GapExpert.mq4 |
+//|                                                          VysiXXX |
+//|                                                                  |
+//+------------------------------------------------------------------+
+#property copyright "VysiXXX"
+#property link      ""
+
+
+extern double BE = 0;             // Posun na BE v %
+extern int BEPlus = 10;
+extern double Lots = 0.01;
+extern double RRRTP = 2;          // RRR nasobek SL
+extern int CandleTimer = 3;       //Počet svící po kterých příkaz zruší
+extern double ManualTPRRR = 0;    // target=SL*ManualTPRRR
+extern int CandleSL = 0;         // přitahování SL po svících, zatím jen po 1 svíci
+extern bool CandleSLnoTP = false;    // přitahování SL po svících bez targetu
+extern double MaxSL = 0;            // Maximalni SL
+extern double MinTP = 0;            // Minimalni target
+extern bool Trend = false;       // trend EMA 10 20 30
+extern int SumOpenTrade=100;     // maximalni pocet otevrenych obchodu
+
+//--------------------------------------------------------------
+
+
+
+double TPpips,LongDelete,ShortDelete,TPLong,TPShort,SLLong,SLShort,NumberCandle,LongSLPrice,ShortSLPrice;
+bool TestH1,GAPDown,GAPUp,RazeniLong,RazeniShort;
+int i,j,k,ticket,Error;
+double Pips=0.2,Gap,RRRS,RRRL,EMA10,EMA20,EMA30,MaxSLEU,MinTPEU;
+
+//+------------------------------------------------------------------+
+//| expert initialization function                                   |
+//+------------------------------------------------------------------+
+int init()
+  {
+//----
+   
+//----
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+int deinit()
+  {
+      
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| expert start function                                            |
+//+------------------------------------------------------------------+
+int start()
+  { 
+  
+
+ 
+ //---------------------------------------------- code gap
+   
+  NewBarH1();
+  if(TestH1 == true)
+  {
+  
+  EMA10 = iMA(NULL,0,10,0,MODE_EMA,PRICE_CLOSE,1);
+  EMA20 = iMA(NULL,0,20,0,MODE_EMA,PRICE_CLOSE,1);
+  EMA30 = iMA(NULL,0,30,0,MODE_EMA,PRICE_CLOSE,1);
+  //-------------- Řazení EMA
+  if(EMA10>EMA20 && EMA20>EMA30)RazeniLong=true;
+      else RazeniLong=false;
+  if(EMA10<EMA20 && EMA20<EMA30)RazeniShort=true;
+      else RazeniShort=false;
+  
+  MaxSLEU=MaxSL/10000;
+  MinTPEU=MinTP/10000;
+  //Print(MaxSLEU);
+  
+  if(Trend==false)
+   {
+   RazeniLong=true;
+   RazeniShort=true;
+   }
+  
+  
+  ResetLastError();
+   int filehandle=FileOpen("EU.csv",FILE_READ|FILE_CSV,',');
+   if(filehandle!=INVALID_HANDLE)
+     {
+     while(FileIsEnding(filehandle)==false)  // While the file pointer..
+     {                                 // ..is not at the end of the file
+      //---------------------------------------------------------
+      string Text =FileReadString(filehandle);// Date and time of the event (date)
+      string Text2     =FileReadString(filehandle);// Text of event description
+      if(FileIsEnding(filehandle)==true)   // File pointer is at the end
+         break;                        // Exit reading and drawing
+      //---------------------------------------------------------
+     }
+     double Hodnota=StringToDouble(Text2);
+     Print(Hodnota);
+      
+      FileClose(filehandle);
+      
+     }
+   else Print("Operation FileOpen failed, error ",GetLastError());
+  
+//----------------------------------------------  
+  
+  
+  
+  //---Řízení otevřených obj.----------+
+   for(i=0;i<OrdersTotal();i++)
+     {
+      OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      if(OrderSymbol()==Symbol())      
+        {
+        if(OrderType() == OP_BUY || OrderType() == OP_BUYSTOP || OrderType() == OP_BUYLIMIT) j++;
+        if(OrderType() == OP_SELL || OrderType() == OP_SELLSTOP || OrderType() == OP_SELLLIMIT) k++;
+        //if(OrderType() == OP_BUYSTOP && Close[0] <= LongDelete) OrderDelete(OrderTicket());
+        //if(OrderType() == OP_SELLSTOP && Close[0] >= ShortDelete) OrderDelete(OrderTicket());
+        
+        
+        
+        
+        if(OrderType() == OP_BUY)
+            {
+            if(BE > 0)
+               {               
+               if(OrderStopLoss() < OrderOpenPrice())
+               { 
+               double BERozd=(OrderTakeProfit()-OrderOpenPrice())*BE;
+               double BEPrice=OrderOpenPrice()+BERozd;
+               Print("BEPriceLong: ",BEPrice);          
+               if(Close[0] >= BEPrice)
+                  {
+                  Print("Posun na BE");                 
+                  OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(OrderOpenPrice()+(BEPlus*Point),Digits),OrderTakeProfit(),0);                                    
+                  }
+               }
+               }
+               
+             if(OrderProfit()>0 && CandleSL>0)
+               {
+               if(Low[1] > Low[2])
+                  {
+                  OrderModify(OrderTicket(),OrderOpenPrice(),Low[1]-0.0004,OrderTakeProfit(),0);
+                  }
+               }  
+               
+             }
+        if(OrderType() == OP_SELL)
+            {
+            if(BE > 0)
+               {
+               if(OrderStopLoss() > OrderOpenPrice())
+               {               
+               BERozd=(OrderOpenPrice()-OrderTakeProfit())*BE;
+               BEPrice=OrderOpenPrice()-BERozd;
+               Print("BEPriceShort: ",BEPrice);
+               if(Close[0] <= BEPrice)
+                  {
+                  Print("Posun na BE");                 
+                  OrderModify(OrderTicket(),OrderOpenPrice(),NormalizeDouble(OrderOpenPrice()-(BEPlus*Point),Digits),OrderTakeProfit(),0);                                                      
+                  }
+             
+               }           
+               }
+            if(OrderProfit()>0 && CandleSL>0)
+               {
+               if(High[1] < High[2])
+                  {
+                  OrderModify(OrderTicket(),OrderOpenPrice(),High[1]+0.0007,OrderTakeProfit(),0);
+                  }
+               }   
+               
+               
+            }
+        }
+        }
+  
+  
+  //---Řízení otevřených obj.----------+
+   for(i=0;i<OrdersTotal();i++)
+     {
+      OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      if(OrderSymbol()==Symbol())      
+        {
+        if(OrderType() ==  OP_BUYLIMIT) 
+         {
+         NumberCandle=(TimeCurrent()-OrderOpenTime())/(Period()*60);
+         //Print(NumberCandle);
+         if(NumberCandle>=CandleTimer)OrderDelete(OrderTicket());
+         }
+        if(OrderType()  == OP_SELLLIMIT) 
+         {
+         NumberCandle=(TimeCurrent()-OrderOpenTime())/(Period()*60);
+         //Print(NumberCandle);
+         if(NumberCandle>=CandleTimer)OrderDelete(OrderTicket());
+         }
+        
+        
+        
+        }
+     }
+  
+  
+ 
+ }
+ 
+    
+   return(0);
+  }
+//+------------------------------------------------------------------+
+
+void NewBarH1() //detekováni nové svíce v D1
+  {
+   static datetime New_Time=0;
+   TestH1=false;
+   if(New_Time!=Time[0])
+     {
+      New_Time=Time[0];
+      TestH1=true;
+     }
+}
