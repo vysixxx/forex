@@ -1,0 +1,23 @@
+library(tictoc)
+
+for (x in 1:3)
+{
+   	tic(x)
+	h <- substring(date(),12,13)
+	m <- substring(date(),15,16)
+	s <- substring(date(),18,19)
+	hn <- as.numeric(h)
+	mn <- as.numeric(m)
+	sn <- as.numeric(s)
+	
+	y <- substring(date(),16,16)
+	z <- as.numeric(y)
+	if(z>5){w=(10-z)*60}
+		else{w=(5-z)*60}
+	if(z == 0 || z == 5){w=300}
+   	Sys.sleep(w)
+	save <- (c(4))
+	save[x] <- hn+mn
+	print(save)
+   	toc(x)
+}
