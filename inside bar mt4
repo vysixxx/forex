@@ -1,0 +1,96 @@
+//+------------------------------------------------------------------+
+//|                                                    HiLoSwing.mq4 |
+//|                                                          Vysixxx |
+//|                                                                  |
+//+------------------------------------------------------------------+
+#property copyright "Vysixxx"
+#property link      ""
+#property version   "1.00"
+#property strict
+#property indicator_chart_window
+#property indicator_buffers 1
+#property indicator_color1 Blue
+extern int History=500;
+   
+   int i,CountedBars;
+   string name;
+   datetime time1,time2;
+   double price1,price2;
+   bool actRect=false;
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int init()
+  {
+   
+   
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int deinit()
+  {
+   ObjectsDeleteAll(0,OBJ_RECTANGLE);
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+
+int start()
+  {
+   
+
+   CountedBars=IndicatorCounted(); // Amount of counted bars
+   i=Bars-CountedBars-1;           // Index of the first uncounted
+   if(i>History-1)                 // If too many bars ..
+      i=History-1;                  // ..calculate specified amount
+
+   while(i>0)
+     {
+     if(actRect==false)
+     {
+     if(High[i]<High[i+1] && Low[i]>Low[i+1])
+      {
+      SendNotification("INside na: "+Symbol());      
+      name = "rect"+Symbol()+TimeToString(iTime(NULL,0,i+1));
+      time1 = iTime(NULL,0,i+1);
+      price1 = High[i+1];
+      time2 = iTime(NULL,0,i);
+      price2 = Low[i+1]; 
+            
+      if(!ObjectCreate(name,OBJ_RECTANGLE,0,time1,price1,time2,price2))
+      {
+      Print(__FUNCTION__,
+            ": failed to create a rectangle! Error code = ",GetLastError());
+      return(false);
+      }
+      ObjectSet(name,OBJPROP_COLOR,clrPowderBlue);
+      actRect=true;      
+      }
+     }
+     if(actRect==true)
+      {
+      if(Close[i]>price1 || Close[i]<price2)
+         {
+         SendNotification("BREAK INside na: "+Symbol());
+         ObjectDelete(name);
+         time2=iTime(NULL,0,i);
+         ObjectCreate(name,OBJ_RECTANGLE,0,time1,price1,time2,price2);
+         ObjectSet(name,OBJPROP_COLOR,clrPowderBlue);
+         actRect=false;
+         }else{
+               ObjectDelete(name);
+               time2=iTime(NULL,0,i);
+               ObjectCreate(name,OBJ_RECTANGLE,0,time1,price1,time2,price2);
+               ObjectSet(name,OBJPROP_COLOR,clrPowderBlue);
+              } 
+      }
+      
+      i--;
+     }
+
+   return(0);
+  }
+//+------------------------------------------------------------------+
