@@ -1,0 +1,91 @@
+//+------------------------------------------------------------------+
+//|                                                    HiLoSwing.mq4 |
+//|                                                          Vysixxx |
+//|                                                                  |
+//+------------------------------------------------------------------+
+#property copyright "Vysixxx"
+#property link      ""
+#property version   "1.00"
+#property strict
+#property indicator_chart_window
+#property indicator_buffers 1
+#property indicator_color1 Blue
+
+   string font_type = "Arial";
+   int i,j;   
+   double EMA10,EMA20,EMA30;
+   
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   ObjectCreate("trend60", OBJ_LABEL, 0, 0, 0);
+   ObjectSet("trend60", OBJPROP_XDISTANCE, 900);
+   ObjectSet("trend60", OBJPROP_YDISTANCE, 15);   
+   ObjectSetText("trend60","",12,font_type,Black);   
+   
+   ObjectCreate("trend240", OBJ_LABEL, 0, 0, 0);
+   ObjectSet("trend240", OBJPROP_XDISTANCE, 900);
+   ObjectSet("trend240", OBJPROP_YDISTANCE, 35);
+   ObjectSetText("trend240","",12,font_type,Black);
+
+   ObjectCreate("trend1440", OBJ_LABEL, 0, 0, 0);
+   ObjectSet("trend1440", OBJPROP_XDISTANCE, 900);
+   ObjectSet("trend1440", OBJPROP_YDISTANCE, 55);
+   ObjectSetText("trend1440","",12,font_type,Black);
+         
+   ObjectCreate("trend10080", OBJ_LABEL, 0, 0, 0);
+   ObjectSet("trend10080", OBJPROP_XDISTANCE, 900);
+   ObjectSet("trend10080", OBJPROP_YDISTANCE, 75);
+   ObjectSetText("trend10080","",12,font_type,Black);
+   
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int deinit()
+  {
+   ObjectsDeleteAll(0,OBJ_LABEL);
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+
+int start()
+  {
+   
+
+   
+   int TF[4]={60,240,1440,10080};
+   string UD[3]={"UP","DOWN","NO TREND"};
+   string state[4];
+   
+   
+     for(j=0;j<=3;j++)
+      {
+      EMA10 = iMA(NULL,TF[j],10,0,MODE_EMA,PRICE_CLOSE,1);
+      EMA20 = iMA(NULL,TF[j],20,0,MODE_EMA,PRICE_CLOSE,1);
+      EMA30 = iMA(NULL,TF[j],30,0,MODE_EMA,PRICE_CLOSE,1);
+  //-------------- Řazení EMA
+      if(EMA10>EMA20 && EMA20>EMA30)state[j]=UD[0];
+         else if(EMA10<EMA20 && EMA20<EMA30)state[j]=UD[1];      
+            else state[j]=UD[2];  
+      }
+      
+      string text60=IntegerToString(TF[0])+" "+state[0];
+      string text240=IntegerToString(TF[1])+" "+state[1];
+      string text1440=IntegerToString(TF[2])+" "+state[2];
+      string text10080=IntegerToString(TF[3])+" "+state[3];
+      
+      ObjectSetText("trend60",text60,12,font_type,Black);
+      ObjectSetText("trend240",text240,12,font_type,Black);
+      ObjectSetText("trend1440",text1440,12,font_type,Black);
+      ObjectSetText("trend10080",text10080,12,font_type,Black);
+      
+
+   return(0);
+  }
+//+------------------------------------------------------------------+
