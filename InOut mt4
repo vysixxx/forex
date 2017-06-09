@@ -1,0 +1,90 @@
+//+------------------------------------------------------------------+
+//|                                                    HiLoSwing.mq4 |
+//|                                                          Vysixxx |
+//|                                                                  |
+//+------------------------------------------------------------------+
+#property copyright "Vysixxx"
+#property link      ""
+#property version   "1.00"
+#property strict
+#property indicator_chart_window
+#property indicator_buffers 3
+#property indicator_color1 Blue
+#property indicator_color2 DarkOrange
+#property indicator_color3 Red
+extern int History=500;
+extern int IndiPips = 50;            //odstup šipky od svíce v bodech
+double HighSw[],LowSw[],InSide[];
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   SetIndexBuffer(0,HighSw);        // Assigning an array to a buffer
+   SetIndexBuffer(1,LowSw);        // Assigning an array to a buffer
+   SetIndexBuffer(2,InSide);        // Assigning an array to a buffer
+   SetIndexStyle(0,DRAW_ARROW);
+   SetIndexArrow(0,172);
+   SetIndexStyle(1,DRAW_ARROW);
+   SetIndexArrow(1,74);
+   SetIndexStyle(2,DRAW_ARROW);
+   SetIndexArrow(0,171);
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int deinit()
+  {
+   ObjectsDeleteAll(0,OBJ_ARROW);
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+
+int start()
+  {
+   int i,CountedBars;
+   
+
+   CountedBars=IndicatorCounted(); // Amount of counted bars
+   i=Bars-CountedBars-1;           // Index of the first uncounted
+   if(i>History-1)                 // If too many bars ..
+      i=History-1;                  // ..calculate specified amount
+
+   while(i>0)
+     {
+      //------------------------------------------------------------- double inside
+      //if((High[i]<High[i+1] && High[i+1]<High[i+2]) && (Low[i]>Low[i+1] && Low[i+1]>Low[i+2]))HighSw[i]=High[i]+IndiPips*Point;
+      /*if(High[i]<High[i+1] && Low[i]>Low[i+1]) 
+         {
+         HighSw[i]=High[i]+IndiPips*Point;
+         
+         }*/  
+
+         
+                   
+                 
+              
+        
+
+      //---------------------------------------------------------------- outside
+      if(High[i]>High[i+1] && Low[i]<Low[i+1])
+        {
+         
+        LowSw[i]=High[i]+IndiPips*Point;
+                
+        }
+        
+     //----------------------------------------------------------------- inside   
+      
+     if(High[i]<High[i+1] && Low[i]>Low[i+1])InSide[i]=High[i]+IndiPips*Point;   
+        
+
+      i--;
+     }
+
+   return(0);
+  }
+//+------------------------------------------------------------------+
