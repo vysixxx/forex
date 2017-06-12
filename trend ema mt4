@@ -13,7 +13,7 @@
 
    string font_type = "Arial";
    int i,j;   
-   double EMA10,EMA20,EMA30;
+   double EMA10,EMA20,EMA30,EMA100,EMA200;
    
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -40,6 +40,16 @@ int OnInit()
    ObjectSet("trend10080", OBJPROP_YDISTANCE, 75);
    ObjectSetText("trend10080","",12,font_type,Black);
    
+   ObjectCreate("trendD1100", OBJ_LABEL, 0, 0, 0);
+   ObjectSet("trendD1100", OBJPROP_XDISTANCE, 1200);
+   ObjectSet("trendD1100", OBJPROP_YDISTANCE, 150);
+   ObjectSetText("trendD1100","",12,font_type,Black);
+   
+   ObjectCreate("trendD1200", OBJ_LABEL, 0, 0, 0);
+   ObjectSet("trendD1200", OBJPROP_XDISTANCE, 1200);
+   ObjectSet("trendD1200", OBJPROP_YDISTANCE, 170);
+   ObjectSetText("trendD1200","",12,font_type,Black);
+   
    return(0);
   }
 //+------------------------------------------------------------------+
@@ -61,7 +71,7 @@ int start()
    
    int TF[4]={60,240,1440,10080};
    string UD[3]={"UP","DOWN","NO TREND"};
-   string state[4];
+   string state[4],State100,State200;
    
    
    
@@ -69,7 +79,7 @@ int start()
       {
       EMA10 = iMA(NULL,TF[j],10,0,MODE_EMA,PRICE_CLOSE,1);
       EMA20 = iMA(NULL,TF[j],20,0,MODE_EMA,PRICE_CLOSE,1);
-      EMA30 = iMA(NULL,TF[j],30,0,MODE_EMA,PRICE_CLOSE,1);
+      EMA30 = iMA(NULL,TF[j],30,0,MODE_EMA,PRICE_CLOSE,1);      
   //-------------- Řazení EMA
       if(EMA10>EMA20 && EMA20>EMA30)state[j]=UD[0];         
          else if(EMA10<EMA20 && EMA20<EMA30)state[j]=UD[1];          
@@ -99,8 +109,20 @@ int start()
       if(state[3]=="DOWN")ObjectSetText("trend10080",text10080,12,font_type,Red);
       if(state[3]=="NO TREND")ObjectSetText("trend10080",text10080,12,font_type,Blue);
       
+      EMA100 = iMA(NULL,1440,100,0,MODE_SMA,PRICE_CLOSE,1);
+      EMA200 = iMA(NULL,1440,200,0,MODE_SMA,PRICE_CLOSE,1);
+      if(iClose(NULL,1440,1)>EMA100)State100="UP";
+         else State100="DOWN";
+      if(iClose(NULL,1440,1)>EMA200)State200="UP";
+         else State200="DOWN";   
       
-   
+      string textMA100="MA 100: "+State100;
+      if(State100=="UP")ObjectSetText("trendD1100",textMA100,12,font_type,Green);
+      if(State100=="DOWN")ObjectSetText("trendD1100",textMA100,12,font_type,Red);
+      
+      string textMA200="MA 200: "+State200;
+      if(State200=="UP")ObjectSetText("trendD1200",textMA200,12,font_type,Green);
+      if(State200=="DOWN")ObjectSetText("trendD1200",textMA200,12,font_type,Red);
    return(0);
   }
 //+------------------------------------------------------------------+
