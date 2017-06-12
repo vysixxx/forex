@@ -1,0 +1,138 @@
+//+------------------------------------------------------------------+
+//|                                        Simply Trend Follow (STF) |
+//|                                                          Vysixxx |
+//|                                                                  |
+//+------------------------------------------------------------------+
+#property copyright "VysiXXX"
+#property link      ""
+
+extern int EntryTime = 8;  // open vstupní svíce
+extern int Interval = 6;   // před kolika svícemi "měřit" cenu  
+extern int CloseTime = 8;  // close výstupní svíce
+extern bool EntryMarket = true;   // vstup marketem(true), limitem (false)
+extern bool Trend = true;         // potvrzení trendu pomocí EMA 10 20 30
+extern int Target = 0;
+extern int StopLoss=0;
+extern double Lots = 0.1;
+
+bool Buy,Sell,UPt,DOWNt,NOt,TestH1;
+double EMA10,EMA20,EMA30;
+int ticket,j,k,i,NumberCandle;
+//+------------------------------------------------------------------+
+//| expert initialization function                                   |
+//+------------------------------------------------------------------+
+int init()
+  {
+//----
+   
+//----
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+int deinit()
+  {
+      
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| expert start function                                            |
+//+------------------------------------------------------------------+
+int start()
+  { 
+
+   
+  NewBarH1();
+  if(TestH1 == true)
+  {
+  
+  //----------- zavření předchozích pozic
+  if(Hour() == CloseTime)
+      {
+      for(i=0;i<OrdersTotal();i++)
+     {
+      OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      if(OrderSymbol()==Symbol())      
+         {
+        if(OrderType() == OP_BUY || OrderType() == OP_BUYSTOP || OrderType() == OP_BUYLIMIT) j++;
+        if(OrderType() == OP_SELL || OrderType() == OP_SELLSTOP || OrderType() == OP_SELLLIMIT) k++;
+        if(OrderType() == OP_BUYSTOP) OrderDelete(OrderTicket());
+        if(OrderType() == OP_SELLSTOP) OrderDelete(OrderTicket());
+        if(OrderType() == OP_BUY)
+         {
+         NumberCandle=(TimeCurrent()-OrderOpenTime())/(Period()*60);
+         if(NumberCandle>=1)OrderClose(OrderTicket(),OrderLots(),Bid,3,Red);         
+         }
+        if(OrderType() == OP_SELL) 
+         {
+         NumberCandle=(TimeCurrent()-OrderOpenTime())/(Period()*60);
+         if(NumberCandle>=1)OrderClose(OrderTicket(),OrderLots(),Ask,3,Red);         
+         }
+        
+         }
+      }
+    }
+ //------------------------------------------------------------------------------------ 
+  
+  
+  
+  
+   
+   
+   EMA10 = iMA(NULL,0,10,0,MODE_EMA,PRICE_CLOSE,1);
+   EMA20 = iMA(NULL,0,20,0,MODE_EMA,PRICE_CLOSE,1);
+   EMA30 = iMA(NULL,0,30,0,MODE_EMA,PRICE_CLOSE,1);
+   if(EMA10>EMA20 && EMA20>EMA30)   
+      {
+      UPt=true;
+      DOWNt=false;
+      }         
+      else if(EMA10<EMA20 && EMA20<EMA30)
+         {
+         DOWNt=true;
+         UPt=false;
+         }
+         else{
+               DOWNt=false;
+               UPt=false;
+             }
+                
+  //-----------------------Otevření nových pozic 
+   
+   if(Hour() == EntryTime)
+      {
+      if(Close[1]> iClose(NULL,0,Interval))   Buy=true;
+      if(Close[1]< iClose(NULL,0,Interval))   Sell=true;
+      
+   
+      
+  
+  if(Buy == true)
+   {
+   if(EntryMarket==true)ticket=OrderSend(Symbol(),OP_BUY,Lots,Ask,0,0,0,"HigherLowerClose",255,0,CLR_NONE);
+   if(EntryMarket==false)ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1],0,0,0,"HigherLowerClose",255,0,CLR_NONE);   
+   }
+  if(Sell == true)
+   {
+   if(EntryMarket==true)ticket=OrderSend(Symbol(),OP_SELL,Lots,Bid,0,0,0,"HigherLowerClose",255,0,CLR_NONE);
+   if(EntryMarket==false) ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1],0,0,0,"HigherLowerClose",255,0,CLR_NONE);  
+   } 
+  }
+  
+    
+  }      
+  return(0);
+  }  
+//+------------------------------------------------------------------+
+
+void NewBarH1() //detekováni nové svíce v D1
+  {
+   static datetime New_Time=0;
+   TestH1=false;
+   if(New_Time!=Time[0])
+     {
+      New_Time=Time[0];
+      TestH1=true;
+     }
+}   
