@@ -1,0 +1,75 @@
+//+------------------------------------------------------------------+
+//|                                                    HiLoSwing.mq4 |
+//|                                                          Vysixxx |
+//|                                                                  |
+//+------------------------------------------------------------------+
+#property copyright "Vysixxx"
+#property link      ""
+#property version   "1.00"
+#property strict
+#property indicator_separate_window
+#property indicator_buffers 2
+#property indicator_color1 Green
+#property indicator_color2 Red
+#property indicator_level1     0.01
+#property indicator_level2     -0.01
+#property indicator_levelcolor clrSilver
+#property indicator_levelstyle STYLE_DOT
+
+extern int History=500;
+double HighSw[],LowSw[],EMA10,EMA20,EMA30,EMA200,SignShort[],SignLong[];
+double Diff10,Diff20,Diff30;
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   SetIndexBuffer(0,HighSw);        // Assigning an array to a buffer
+   SetIndexBuffer(1,LowSw);        // Assigning an array to a buffer
+   SetIndexStyle(0,DRAW_LINE);
+   SetIndexArrow(0,234);
+   SetIndexStyle(1,DRAW_ARROW);
+   SetIndexArrow(1,233);
+   
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int deinit()
+  {
+   //ObjectsDeleteAll(0,OBJ_);
+   return(0);
+  }
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+
+int start()
+  {
+   int i,CountedBars;
+   
+
+   CountedBars=IndicatorCounted(); // Amount of counted bars
+   i=Bars-CountedBars-1;           // Index of the first uncounted
+   if(i>History-1)                 // If too many bars ..
+      i=History-1;                  // ..calculate specified amount
+
+   while(i>0)
+     {
+      EMA10 = iMA(NULL,0,10,0,MODE_EMA,PRICE_CLOSE,i);
+      EMA20 = iMA(NULL,0,20,0,MODE_EMA,PRICE_CLOSE,i);
+      EMA30 = iMA(NULL,0,30,0,MODE_EMA,PRICE_CLOSE,i);
+      EMA200= iMA(NULL,0,200,0,MODE_EMA,PRICE_CLOSE,i);
+      //-------------------------------------------------------------+ 
+      Diff10=Close[i]-EMA10;
+      Diff20=Close[i]-EMA20;
+      Diff30=Close[i]-EMA30;
+      HighSw[i]=Diff30-Diff20-Diff10;
+      
+      i--;
+     }
+
+   return(0);
+  }
+//+------------------------------------------------------------------+
