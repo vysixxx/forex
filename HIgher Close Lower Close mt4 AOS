@@ -17,7 +17,7 @@ extern int CandleTimer = 1;       //Počet svící po kterých příkaz zruší
 extern bool Trend = false;
 extern bool OneCandleTP = true;          // obchod se zavře na close první svíce po vstupu
 extern int CandleSL= 0;           // Pritahovani po x svicich
-extern double NasobekTP= 1;
+extern double NasobekTP= 0;         // target je velikost signalni svice
 extern double MaxSL= 100;           // max SL v pipsech             
 extern double PevnyTP = 10;            // pevny TP
 extern bool TPClose1=true;        // target na close signální
@@ -82,15 +82,23 @@ int start()
   
   if(Low[1]<Low[2]&&RazeniLong==true)
    {
-   Print("tady long");
-   ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",255,0,CLR_NONE);
+   TP=0;
+   if(NasobekTP>0)
+      {
+      TP=(High[1]-Low[1])+High[1]+0.0005;
+      }
+   ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,TP,"HiCl",255,0,CLR_NONE);
    }
    
    
   if(High[1]>High[2]&&RazeniShort==true)
    {
-   Print("tady short");
-   ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",255,0,CLR_NONE);
+   TP=0;
+   if(NasobekTP>0)
+      {
+      TP=(Low[1]-0.0005)-(High[1]-Low[1]);
+      }
+   ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,TP,"LoCl",255,0,CLR_NONE);
    } 
 //----------------------------------------------  
   
@@ -134,7 +142,7 @@ int start()
                   OrderModify(OrderTicket(),OrderOpenPrice(),Low[1]-0.0005,OrderTakeProfit(),0);
                   }
                }  
-             if(OrderProfit()<0)
+             if(OrderProfit()<0 && OneCandleTP==true)
                {
                OrderClose(OrderTicket(),OrderLots(),Bid,3,Red);
                }  
@@ -163,7 +171,7 @@ int start()
                   OrderModify(OrderTicket(),OrderOpenPrice(),High[1]+0.0005,OrderTakeProfit(),0);
                   }
                }   
-            if(OrderProfit()<0)
+            if(OrderProfit()<0 && OneCandleTP==true)
                {
                OrderClose(OrderTicket(),OrderLots(),Ask,3,Red);
                }   
