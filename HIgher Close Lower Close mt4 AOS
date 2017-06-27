@@ -80,14 +80,14 @@ int start()
    //Print("SLMax: ",SLMax);
   //---------------------------------------------------
   
-  if(Close[1]>High[2]&&RazeniLong==true)
+  if(Low[1]<Low[2]&&RazeniLong==true)
    {
    Print("tady long");
    ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",255,0,CLR_NONE);
    }
    
    
-  if(Close[1]<Low[2]&&RazeniShort==true)
+  if(High[1]>High[2]&&RazeniShort==true)
    {
    Print("tady short");
    ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",255,0,CLR_NONE);
