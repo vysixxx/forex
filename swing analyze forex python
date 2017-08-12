@@ -1,0 +1,146 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Aug  1 17:49:50 2017
+
+@author: vysixxx
+"""
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+import matplotlib.finance as mpl_finance
+
+series = pd.read_csv('C:/Users/vysixxx/AppData/Roaming/MetaQuotes/Terminal/AEB4861A0EF1D9286DAA04C0B04B7A1E/MQL4/Files/USDCAD.txt', 
+                     header=1, parse_dates=None, index_col=0, squeeze=True)
+
+fig, ax = plt.subplots()
+
+mpl_finance.candlestick2_ohlc(ax,series['OPEN'] ,series['HIGH'] ,series['LOW'] , 
+                              series['CLOSE'], width=2, colorup='g', colordown='r', alpha=0.75)
+plt.show()
+
+tradeNo=0;vysledky=np.zeros((50,8))
+#1. trade number, 2.trend, 3.SL, 4.potencial, 5. dokonceni swingu, 6.open trade
+#7. i High nebo Low swingu, 8. long 1/short -1, 9. prave rameno níž/výš
+
+        
+
+def long(i,j,k):
+    SL=(series.HIGH[i+j]-series.LOW[i])*10000
+    vysledky[tradeNo][2]=SL   
+    MaxHiOld=0
+    for k in range(1,len(series)-i+j+k+1):
+        if(series.LOW[i+j+k]>=series.LOW[i]):
+            MaxHiNew=series.HIGH[i+j+k]
+            if(MaxHiNew>MaxHiOld):
+                MaxHiOld=MaxHiNew
+        if(len(series)-(i+j+k)==1):
+            print("konec při max High",(MaxHiOld-series.HIGH[i+j])*10000)
+            break
+    print("SL",SL,"Maximum",(MaxHiOld-series.HIGH[i+j])*10000)
+    vysledky[tradeNo][3]=((MaxHiOld-series.HIGH[i+j])*10000)    
+
+def short(i,j,k):
+    SL=(series.HIGH[i]-series.LOW[i+j])*10000
+    vysledky[tradeNo][2]=SL   
+    for k in range(1,len(series)-i+j+1):
+        MaxLoOld=1000        
+        if(series.HIGH[i+j+k]<=series.HIGH[i]):            
+            MaxLoNew=series.LOW[i+j+k]
+            if(MaxLoNew<MaxLoOld):
+                MaxLoOld=MaxLoNew                
+        if(len(series)-(i+j+k)==1):
+            print("konec při max Low",(series.LOW[i+j]-MaxLoOld)*10000)
+            break
+    print("SL",SL,"Maximum",(series.LOW[i+j]-MaxLoOld)*10000)
+    vysledky[tradeNo][3]=((series.LOW[i+j]-MaxLoOld)*10000)
+
+for i in range(1,len(series)):
+    if(series.LoFr[i]!=0)or(series.HiFr[i]!=0):
+        tradeNo+=1
+        vysledky[tradeNo][0]=tradeNo
+        vysledky[tradeNo][6]=i        
+    if(series.LoFr[i]!=0):
+        print("--------------------------------------------")
+        print("mam low swingu",series.LOW[i])
+        vysledky[tradeNo][7]=1
+        if(series.EMALong[i]==1):
+            vysledky[tradeNo][1]=1
+        elif(series.EMAShort[i]==1):
+            vysledky[tradeNo][1]=-1
+        else:
+            vysledky[tradeNo][1]=0            
+        for j in range(1,6):
+            if(series.HIGH[i+j]>series.HIGH[i]):
+                print("swing se dokončil na",j,"svíci")
+                vysledky[tradeNo][4]=j                    
+                for k in range(1,6):
+                    if(len(series)-(i+j+k)==1):
+                        print("konec svící")
+                        break
+                    if(series.HIGH[i+j+k]>series.HIGH[i+j]):
+                       print("buy začal na",j+k,"svíci")
+                       vysledky[tradeNo][5]=j+k                               
+                       long(i,j,k)
+                       break
+                    if(k==6):
+                        print("obchod by nezačal do",k,"svící")                       
+                break
+            break
+    if(series.HiFr[i]!=0):
+        print("--------------------------------------------")
+        print("mam high swingu",series.HIGH[i])
+        vysledky[tradeNo][7]=-1
+        if(series.EMALong[i]==1):
+            vysledky[tradeNo][1]=-1
+        elif(series.EMAShort[i]==1):
+            vysledky[tradeNo][1]=1
+        else:
+            vysledky[tradeNo][1]=0
+        for j in range(1,6):
+            if(series.LOW[i+j]<series.LOW[i]):
+                print("swing se dokončil na",j,"svíci")
+                vysledky[tradeNo][4]=j
+                for k in range(1,6):
+                    if(len(series)-(i+j+k)==1):
+                        print("konec svící")
+                        break
+                    if(series.LOW[i+j+k]<series.LOW[i+j]):
+                        print("sell začal na",j+k,"svíci")
+                        vysledky[tradeNo][5]=j+k
+                        short(i,j,k)
+                        break
+                    if(k==6):
+                        print("obchod by nenabral do",k,"svící")
+                break
+            break
+
+print("---------- gapy na swingu -------------")        
+for i in range(1,len(vysledky)):        
+    if(vysledky[i][4]==1)and(vysledky[i][7]==1):        
+        lowSw=int(vysledky[i][6])        
+        if(series.CLOSE[lowSw+1]>series.HIGH[lowSw]):
+            print("gap do longu na",lowSw+1,"svíci")
+    if(vysledky[i][4]==1)and(vysledky[i][7]==-1):
+        hiSw=int(vysledky[i][6])
+        if(series.CLOSE[hiSw+1]<series.LOW[hiSw]):
+            print("gap do shortu",hiSw+1,"svíci")
+
+trend=np.zeros((50,8))
+
+for i in range (len(vysledky)):
+    if(vysledky[i][1]==1):
+        print(vysledky[i][0:8])
+        np.append(trend,[i])
+"""for i in range(1,len(vysledky)):    
+    if(vysledky[i][0]!=0)and(vysledky[i][1]==1):
+        print("obchody DO trendu")
+        np.delete(trend,i,0)              
+for i in range(1,len(vysledky)):    
+    if(vysledky[i][0]!=0)and(vysledky[i][1]==-1):
+        print("obchody PROTI trendu")        
+for i in range(1,len(vysledky)):    
+    if(vysledky[i][0]!=0)and(vysledky[i][1]==0):
+        print("obchody BEZ trendu")"""
+
+                
