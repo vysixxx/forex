@@ -12,7 +12,7 @@
 // navysovani pozic?
 extern double BE = 0;             // Posun na BE v %
 extern int BEPlus = 10;
-extern double Lots = 0.1;
+extern double Lots = 0.02;
 extern int CandleTimer = 1;       //Počet svící po kterých příkaz zruší
 extern bool Trend = false;
 extern bool OneCandleTP = true;          // obchod se zavře na close první svíce po vstupu
@@ -30,7 +30,7 @@ extern bool TPClose1=true;        // target na close signální
 bool TestH1,RazeniLong,RazeniShort,HH,LH,LL,HL,swingLong,swingShort;
 bool momLong,momShort;
 int i,j,k,ticket,Error,NumberCandle;
-double EMA10,EMA20,EMA30,TP,SL,SLMax,SLPips,swing1,MA8,MA25,MA200;
+double EMA10,EMA20,EMA30,TP,SL,SLMax,SLPips,swing1,MA8,MA25,MA200,MA8pred,MA25pred;
 
 //+------------------------------------------------------------------+
 //| expert initialization function                                   |
@@ -58,7 +58,7 @@ int start()
   
 
  
- //---------------------------------------------- code gap
+ //---------------------------------------------- 
    
   NewBarH1();
   if(TestH1 == true)
@@ -68,7 +68,9 @@ int start()
   EMA20 = iMA(NULL,0,20,0,MODE_EMA,PRICE_CLOSE,1);
   EMA30 = iMA(NULL,0,30,0,MODE_EMA,PRICE_CLOSE,1);
   MA8 = iMA(NULL,0,8,0,MODE_SMA,PRICE_CLOSE,1);
+  MA8pred = iMA(NULL,0,8,0,MODE_SMA,PRICE_CLOSE,2);
   MA25 = iMA(NULL,0,25,0,MODE_SMA,PRICE_CLOSE,1);
+  MA25pred = iMA(NULL,0,25,0,MODE_SMA,PRICE_CLOSE,2);
   MA200 = iMA(NULL,0,200,0,MODE_SMA,PRICE_CLOSE,1);
   //-------------- Řazení EMA
   if(EMA10>EMA20 && EMA20>EMA30)RazeniLong=true;
@@ -81,8 +83,16 @@ int start()
    RazeniShort=true;
    }
    
-  if(MA8>MA200 && MA25>MA200)momLong=true;
-  if(MA8<MA200 && MA25<MA200)momShort=true; 
+  if(MA8>MA200 && MA25>MA200)
+   {
+   momLong=true;
+   momShort=false;
+   }
+  if(MA8<MA200 && MA25<MA200)
+   {
+   momShort=true;
+   momLong=false;
+   }
    
    SLMax=MaxSL/10000;
    //Print("SLMax: ",SLMax);
@@ -115,7 +125,7 @@ int start()
    
    }
   
-  Print("HH: ",HH,",LH: ",LH);
+  //Print("HH: ",HH,",LH: ",LH);
   
   for(i=1;i<=100;i++)
    {
@@ -145,7 +155,7 @@ int start()
    
    }
   
-  Print("LL: ",LL,",HL: ",HL);
+  //Print("LL: ",LL,",HL: ",HL);
   
   if(HH==true && HL==true)
    {
@@ -161,8 +171,27 @@ int start()
       swingShort=false;
       swingLong=false;
       } 
-   Print("swingLong: ",swingLong,",swingShort: ",swingShort); 
+   //Print("swingLong: ",swingLong,",swingShort: ",swingShort); 
   //--------------------------------------------------
+  if(momLong==true)
+   {
+   if(MA8>MA25 && MA8pred<MA25pred)
+      {
+      Print("signal long");
+      ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",255,0,CLR_NONE);
+      }
+   }
+  
+  if(momShort==true)
+   {
+   if(MA8<MA25 && MA8pred>MA25pred)
+      {
+      Print("signal short");
+      ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",255,0,CLR_NONE);
+      }
+   }
+  
+  
   
    //ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,TP,"HiCl",255,0,CLR_NONE);
    
