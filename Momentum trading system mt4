@@ -15,8 +15,9 @@ extern int BEPlus = 10;
 extern double Lots = 0.02;
 extern int CandleTimer = 1;       //Počet svící po kterých příkaz zruší
 extern bool Trend = false;
-extern bool OneCandleTP = true;          // obchod se zavře na close první svíce po vstupu
+extern bool OneCandleTP = false;          // obchod se zavře na close první svíce po vstupu
 extern int CandleSL= 0;           // Pritahovani po x svicich
+extern bool TPcrossMA=false;
 extern double NasobekTP= 0;         // target je velikost signalni svice
 extern double MaxSL= 100;           // max SL v pipsech             
 extern double PevnyTP = 10;            // pevny TP
@@ -30,7 +31,7 @@ extern bool TPClose1=true;        // target na close signální
 bool TestH1,RazeniLong,RazeniShort,HH,LH,LL,HL,swingLong,swingShort;
 bool momLong,momShort;
 int i,j,k,ticket,Error,NumberCandle;
-double EMA10,EMA20,EMA30,TP,SL,SLMax,SLPips,swing1,MA8,MA25,MA200,MA8pred,MA25pred;
+double EMA10,EMA20,EMA30,TP,SL,SLMax,SLPips,swing1,MA8,MA25,MA200,MA8pred,MA25pred,MA200pred;
 
 //+------------------------------------------------------------------+
 //| expert initialization function                                   |
@@ -72,6 +73,7 @@ int start()
   MA25 = iMA(NULL,0,25,0,MODE_SMA,PRICE_CLOSE,1);
   MA25pred = iMA(NULL,0,25,0,MODE_SMA,PRICE_CLOSE,2);
   MA200 = iMA(NULL,0,200,0,MODE_SMA,PRICE_CLOSE,1);
+  MA200pred = iMA(NULL,0,200,0,MODE_SMA,PRICE_CLOSE,2);
   //-------------- Řazení EMA
   if(EMA10>EMA20 && EMA20>EMA30)RazeniLong=true;
       else RazeniLong=false;
@@ -190,8 +192,8 @@ int start()
       ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",255,0,CLR_NONE);
       }
    }
-  
-  
+  if(MA8>MA25 && Close[2]<MA200pred && Close[1]>MA200)ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",255,0,CLR_NONE);
+  if(MA8<MA25 && Close[2]>MA200pred && Close[1]<MA200)ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",255,0,CLR_NONE);
   
    //ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,TP,"HiCl",255,0,CLR_NONE);
    
@@ -245,7 +247,11 @@ int start()
              if(OrderProfit()<0 && OneCandleTP==true)
                {
                OrderClose(OrderTicket(),OrderLots(),Bid,3,Red);
-               }  
+               }
+            if(TPcrossMA==true)
+               {
+               if(MA8<MA25)OrderClose(OrderTicket(),OrderLots(),Bid,3,Red);
+               }     
              }
         if(OrderType() == OP_SELL)
             {
@@ -275,7 +281,10 @@ int start()
                {
                OrderClose(OrderTicket(),OrderLots(),Ask,3,Red);
                }   
-               
+            if(TPcrossMA==true)
+               {
+               if(MA8>MA25)OrderClose(OrderTicket(),OrderLots(),Ask,3,Red);
+               }   
             }
         }
         }
