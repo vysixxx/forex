@@ -12,7 +12,7 @@
 // navysovani pozic?
 extern double BE = 0;             // Posun na BE v %
 extern int BEPlus = 10;
-extern double Lots = 0.02;
+extern double Lots = 0.01;
 extern int CandleTimer = 1;       //Počet svící po kterých příkaz zruší
 extern bool Trend = false;
 extern bool OneCandleTP = false;          // obchod se zavře na close první svíce po vstupu
@@ -123,7 +123,7 @@ int start()
             }
          }
       
-      }
+      break;}
    
    }
   
@@ -153,7 +153,7 @@ int start()
             }
          }
       
-      }
+      break;}
    
    }
   
@@ -175,7 +175,7 @@ int start()
       } 
    //Print("swingLong: ",swingLong,",swingShort: ",swingShort); 
   //--------------------------------------------------
-  if(momLong==true)
+  /*if(momLong==true)
    {
    if(MA8>MA25 && MA8pred<MA25pred)
       {
@@ -191,9 +191,19 @@ int start()
       Print("signal short");
       ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",255,0,CLR_NONE);
       }
+   }*/
+  if(MA8>MA25 && Close[2]<MA200pred && Close[1]>MA200)
+   {
+   TP=((High[1]+0.0005)-(Low[1]-0.0005))+(High[1]+0.0005);
+   ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",1,0,CLR_NONE);
+   ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",2,0,CLR_NONE);
    }
-  if(MA8>MA25 && Close[2]<MA200pred && Close[1]>MA200)ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",255,0,CLR_NONE);
-  if(MA8<MA25 && Close[2]>MA200pred && Close[1]<MA200)ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",255,0,CLR_NONE);
+  if(MA8<MA25 && Close[2]>MA200pred && Close[1]<MA200)
+   {
+   TP=(Low[1]-0.0005)-((High[1]+0.0005)-(Low[1]-0.0005));
+   ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",1,0,CLR_NONE);
+   ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",2,CLR_NONE);
+   }
   
    //ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,TP,"HiCl",255,0,CLR_NONE);
    
@@ -222,6 +232,7 @@ int start()
         
         if(OrderType() == OP_BUY)
             {
+            
             if(BE > 0)
                {               
                if(OrderStopLoss() < OrderOpenPrice())
@@ -237,7 +248,7 @@ int start()
                }
                }
                
-             if(OrderProfit()>0 && CandleSL>0)
+             if(OrderProfit()>0 && CandleSL>0 && OrderMagicNumber()==1)
                {
                if(Low[1] > Low[2])
                   {
@@ -248,13 +259,14 @@ int start()
                {
                OrderClose(OrderTicket(),OrderLots(),Bid,3,Red);
                }
-            if(TPcrossMA==true)
+            if(TPcrossMA==true && OrderMagicNumber()==2)
                {
                if(MA8<MA25)OrderClose(OrderTicket(),OrderLots(),Bid,3,Red);
                }     
              }
         if(OrderType() == OP_SELL)
             {
+            
             if(BE > 0)
                {
                if(OrderStopLoss() > OrderOpenPrice())
@@ -270,7 +282,7 @@ int start()
              
                }           
                }
-            if(OrderProfit()>0 && CandleSL>0)
+            if(OrderProfit()>0 && CandleSL>0 && OrderMagicNumber()==1)
                {
                if(High[1] < High[2])
                   {
@@ -281,7 +293,7 @@ int start()
                {
                OrderClose(OrderTicket(),OrderLots(),Ask,3,Red);
                }   
-            if(TPcrossMA==true)
+            if(TPcrossMA==true && OrderMagicNumber()==2)
                {
                if(MA8>MA25)OrderClose(OrderTicket(),OrderLots(),Ask,3,Red);
                }   
