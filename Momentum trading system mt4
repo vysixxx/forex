@@ -195,14 +195,16 @@ int start()
   if(MA8>MA25 && Close[2]<MA200pred && Close[1]>MA200)
    {
    TP=((High[1]+0.0005)-(Low[1]-0.0005))+(High[1]+0.0005);
-   ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",1,0,CLR_NONE);
-   ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",2,0,CLR_NONE);
+   ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,TP,"HiCl",1,0,CLR_NONE);
+   //ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",1,0,CLR_NONE);
+   //ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,0,"HiCl",2,0,CLR_NONE);
    }
   if(MA8<MA25 && Close[2]>MA200pred && Close[1]<MA200)
    {
    TP=(Low[1]-0.0005)-((High[1]+0.0005)-(Low[1]-0.0005));
-   ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",1,0,CLR_NONE);
-   ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",2,CLR_NONE);
+   ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,TP,"LoCl",1,0,CLR_NONE);
+   //ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",1,0,CLR_NONE);
+   //ticket=OrderSend(Symbol(),OP_SELLSTOP,Lots,Low[1]-0.0005,0,High[1]+0.0005,0,"LoCl",2,CLR_NONE);
    }
   
    //ticket=OrderSend(Symbol(),OP_BUYSTOP,Lots,High[1]+0.0005,0,Low[1]-0.0005,TP,"HiCl",255,0,CLR_NONE);
