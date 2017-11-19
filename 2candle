@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 21 08:03:44 2017
+
+@author: uživatel
+"""
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+series = pd.read_csv('C:/Users/uživatel/AppData/Roaming/MetaQuotes/Terminal/D1947BEB86901215B88312DFDDF3CB1C/MQL4/Files/AUDUSD2c.txt', 
+                     header=1, parse_dates=None, index_col=0, squeeze=True)
+
+seriesClose=series['CLOSE'];seriesHigh=series['HIGH'];seriesLow=series['LOW'];seriesOpen=series['OPEN']
+Close=np.array(len(seriesClose));High=np.array(len(seriesHigh));Low=np.array(len(seriesLow));Open=np.array(len(seriesOpen))
+Close=np.copy(seriesClose);High=np.copy(seriesHigh);Low=np.copy(seriesLow);Open=np.copy(seriesOpen)
+VolHL=(High-Low)*10000
+can2=np.stack((Open-Close,series["up"],series["down"]),axis=-1)
+for i in range(len(can2)-2):
+    if(can2[i,0]<0 and can2[i+1,0]>0 and can2[i+2,0]>0):
+        print(i+2)
