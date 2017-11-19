@@ -8,10 +8,12 @@
 #property indicator_chart_window
 extern int length = 100;   // The amount of bars sent to be processed
 double ExtMap[];           // Chart buffer
+double EMA10,EMA20,EMA30;
 string nameData;
+int dt,ut;
 int init()
 {
-   nameData = Symbol()+".txt";         // name of the data file to be sent
+   nameData = Symbol()+"2c"+".txt";         // name of the data file to be sent
    return(0);
 }
 int start()
@@ -35,12 +37,31 @@ void write_data()
     return(0);
   }
   FileWrite(handle, ServerAddress(), Symbol(), Period());                  // heading
-  FileWrite(handle, "DATE","TIME","HIGH","LOW","CLOSE","OPEN","VOLUME");   // heading
+  FileWrite(handle, "DATETIME","HIGH","LOW","CLOSE","OPEN","up","down");   // heading
   int i;
   for (i=length-1; i>=0; i--)
   {
-    FileWrite(handle, TimeToStr(Time[i], TIME_DATE), TimeToStr(Time[i], TIME_SECONDS),
-                      High[i], Low[i], Close[i], Open[i], Volume[i]);
+   EMA10 = iMA(NULL,0,10,0,MODE_EMA,PRICE_CLOSE,i);
+   EMA20 = iMA(NULL,0,20,0,MODE_EMA,PRICE_CLOSE,i);
+   EMA30 = iMA(NULL,0,30,0,MODE_EMA,PRICE_CLOSE,i);
+   if(EMA10>EMA20 && EMA20>EMA30)   
+      {
+      ut=1;
+      dt=0;      
+      }         
+      else if(EMA10<EMA20 && EMA20<EMA30)
+         {
+         dt=1;
+         ut=0;
+         }else{
+               dt=0;
+               ut=0;
+               }
+         
+  
+  
+    FileWrite(handle, TimeToStr(Time[i], TIME_DATE)+" "+TimeToStr(Time[i], TIME_SECONDS),
+                      High[i], Low[i], Close[i], Open[i],ut,dt);
   }
   FileClose(handle);
   Comment("File "+nameData+" has been created. "+TimeToStr(TimeCurrent(), TIME_SECONDS) );
